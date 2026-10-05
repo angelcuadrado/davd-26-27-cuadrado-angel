@@ -112,7 +112,7 @@ tensionamiento en el horizonte de dos años?
 ## Puesta en marcha
 
 ```bash
-git clone https://github.com/<usuario>/davd-26-27-cuadrado-angel.git
+git clone https://github.com/angelcuadrado/davd-26-27-cuadrado-angel.git
 cd davd-26-27-cuadrado-angel
 
 python -m venv .venv
