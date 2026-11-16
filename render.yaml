@@ -1,0 +1,12 @@
+# Despliegue en Render (https://render.com): «New > Blueprint» y elegir este repositorio.
+# La app lee los artefactos ya calculados de data/publicado, así que no necesita red ni reentrenar.
+services:
+  - type: web
+    name: esfuerzo-vivienda
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app.app:server --workers 2 --timeout 120
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8

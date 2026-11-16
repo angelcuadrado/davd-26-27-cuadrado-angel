@@ -28,6 +28,8 @@ data/interim/
 data/processed/
 *.pkl
 *.joblib
+# data/publicado sí se versiona: es lo que lee la app desplegada (sin red ni reentrenar)
+!data/publicado/*.joblib
 
 # Dash / logs
 *.log

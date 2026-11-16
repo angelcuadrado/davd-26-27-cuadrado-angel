@@ -1,0 +1,215 @@
+{
+ "generado": "2026-11-16T15:24:52+00:00",
+ "ultimo_trimestre_precios": "2026Q2",
+ "ultimo_anio_renta": 2024,
+ "supuestos": {
+  "superficie_m2": 90,
+  "financiacion": 0.8,
+  "plazo_anios": 25,
+  "umbral_esfuerzo": 0.3,
+  "umbral_diferencial": 3.0,
+  "ventana_trimestres": 20,
+  "horizonte_trimestres": 8
+ },
+ "validacion": {
+  "precios_prov": {
+   "filas": 6552,
+   "validas": 6463,
+   "rechazadas": 89,
+   "rechazadas_por_regla": {
+    "precio €/m² informado": 89
+   },
+   "desde": "1995Q1",
+   "hasta": "2026Q2",
+   "territorios": 52,
+   "periodos": 126,
+   "cobertura_pct": 98.6
+  },
+  "precios_mun": {
+   "filas": 24978,
+   "validas": 24857,
+   "rechazadas": 121,
+   "rechazadas_por_regla": {
+    "precio €/m² informado": 117,
+    "al menos 20 tasaciones en el trimestre": 4
+   },
+   "desde": "2005Q1",
+   "hasta": "2026Q2",
+   "territorios": 306,
+   "periodos": 86,
+   "cobertura_pct": 94.5
+  },
+  "renta_prov": {
+   "filas": 509,
+   "validas": 508,
+   "rechazadas": 1,
+   "rechazadas_por_regla": {
+    "renta informada (el INE la oculta si hay pocos hogares)": 1
+   },
+   "desde": "2015",
+   "hasta": "2024",
+   "territorios": 52,
+   "periodos": 10,
+   "cobertura_pct": 97.7
+  },
+  "renta_mun": {
+   "filas": 81203,
+   "validas": 73777,
+   "rechazadas": 7426,
+   "rechazadas_por_regla": {
+    "renta informada (el INE la oculta si hay pocos hogares)": 7426
+   },
+   "desde": "2015",
+   "hasta": "2024",
+   "territorios": 8126,
+   "periodos": 10,
+   "cobertura_pct": 90.8
+  },
+  "poblacion_prov": {
+   "filas": 520,
+   "validas": 520,
+   "rechazadas": 0,
+   "rechazadas_por_regla": {},
+   "desde": "2015",
+   "hasta": "2024",
+   "territorios": 52,
+   "periodos": 10,
+   "cobertura_pct": 100.0
+  },
+  "poblacion_mun": {
+   "filas": 81292,
+   "validas": 74611,
+   "rechazadas": 6681,
+   "rechazadas_por_regla": {
+    "población informada": 6681
+   },
+   "desde": "2015",
+   "hasta": "2024",
+   "territorios": 8134,
+   "periodos": 10,
+   "cobertura_pct": 91.7
+  },
+  "ipc": {
+   "filas": 5148,
+   "validas": 5148,
+   "rechazadas": 0,
+   "rechazadas_por_regla": {},
+   "desde": "2002Q1",
+   "hasta": "2026Q3",
+   "territorios": 52,
+   "periodos": 99,
+   "cobertura_pct": 100.0
+  },
+  "alquiler": {
+   "filas": 672,
+   "validas": 672,
+   "rechazadas": 0,
+   "rechazadas_por_regla": {},
+   "desde": "2011",
+   "hasta": "2024",
+   "territorios": 48,
+   "periodos": 14,
+   "cobertura_pct": 100.0
+  },
+  "compraventas": {
+   "filas": 4056,
+   "validas": 4056,
+   "rechazadas": 0,
+   "rechazadas_por_regla": {},
+   "desde": "2007Q1",
+   "hasta": "2026Q2",
+   "territorios": 52,
+   "periodos": 78,
+   "cobertura_pct": 100.0
+  },
+  "tipo_interes": {
+   "filas": 70,
+   "validas": 70,
+   "rechazadas": 0,
+   "rechazadas_por_regla": {},
+   "desde": "2009Q1",
+   "hasta": "2026Q2"
+  }
+ },
+ "normalizacion": {
+  "provincias_fuente_ministerio": 65,
+  "provincias_emparejadas": 53,
+  "provincias_cubiertas": 52,
+  "filas_ministerio_no_provinciales": [
+   "TOTAL NACIONAL",
+   "Andalucía",
+   "Aragón",
+   "Canarias",
+   "Castilla y León",
+   "Castilla-La Mancha",
+   "Cataluña",
+   "Comunidad Valenciana",
+   "Extremadura",
+   "Galicia",
+   "País Vasco",
+   "Ceuta y Melilla"
+  ],
+  "municipios_fuente_ministerio": 306,
+  "municipios_emparejados": 306,
+  "metodos_municipios": {
+   "nombre": 297,
+   "nombre_otra_provincia": 8,
+   "parecido": 1
+  },
+  "municipios_en_otra_provincia": [
+   {
+    "provincia_fuente": "Santa Cruz de",
+    "municipio_fuente": "Adeje",
+    "cod_mun": "38001"
+   },
+   {
+    "provincia_fuente": "Córdoba",
+    "municipio_fuente": "Almuñecar",
+    "cod_mun": "18017"
+   },
+   {
+    "provincia_fuente": "Cuenca",
+    "municipio_fuente": "Azuqueca de Henares",
+    "cod_mun": "19046"
+   },
+   {
+    "provincia_fuente": "Guadalajara",
+    "municipio_fuente": "Illescas",
+    "cod_mun": "45081"
+   },
+   {
+    "provincia_fuente": "Alicante",
+    "municipio_fuente": "Almazora/Almassora",
+    "cod_mun": "12009"
+   },
+   {
+    "provincia_fuente": "Alicante",
+    "municipio_fuente": "Benicarló",
+    "cod_mun": "12027"
+   },
+   {
+    "provincia_fuente": "Cáceres",
+    "municipio_fuente": "Ames",
+    "cod_mun": "15002"
+   },
+   {
+    "provincia_fuente": "Ourense",
+    "municipio_fuente": "Cangas",
+    "cod_mun": "36008"
+   }
+  ],
+  "municipios_por_parecido": [
+   {
+    "municipio_fuente": "Santa Coloma Gramanet",
+    "cod_mun": "08245"
+   }
+  ],
+  "municipios_sin_pareja": []
+ },
+ "fuentes": {
+  "descargas": 128,
+  "primera": "2026-11-16T14:29:04+00:00",
+  "ultima": "2026-11-16T14:41:14+00:00",
+  "megabytes": 206.6
+ }
+}

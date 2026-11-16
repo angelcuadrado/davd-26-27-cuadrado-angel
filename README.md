@@ -43,70 +43,124 @@ delante**. Eso es lo que hace esta aplicación.
    y el informe de calidad de los datos a la vista.
 5. **Documentar las limitaciones** de las fuentes en la propia interfaz, en lugar de ocultarlas.
 
+## Qué dicen los datos (2026 T2)
+
+- **41 de las 52 provincias** cumplen hoy algún criterio del art. 18.3, casi todas por el **criterio de
+  precios**: el valor tasado lleva cinco años creciendo muy por encima del IPC.
+- Por **esfuerzo** solo superan el 30 % **Málaga y Baleares**, con Madrid justo por debajo. Como el
+  cálculo no incluye gastos ni suministros (la ley sí), quien roza el umbral probablemente ya lo supera.
+- Entre los municipios de más de 25.000 habitantes encabezan el esfuerzo **Santa Eulària des Riu,
+  Calvià, Marbella, Fuengirola y Benalmádena**, todos por encima del 38 %.
+- El modelo provincial detecta el **96 %** de los casos que acaban tensionados dos años después, frente
+  al 78 % de la referencia de persistencia, a costa de más falsas alarmas (detalle en la app).
+
 ## Fuentes de datos
 
-Todas públicas, gratuitas y oficiales.
+Todas públicas, gratuitas y oficiales. Cada descarga queda registrada en `data/raw/manifiesto.json`
+(URL, fecha, tamaño y huella SHA-256).
 
-| Fuente | Contenido | Acceso | Frecuencia |
+| Fuente | Qué se usa | Acceso | Frecuencia |
 | --- | --- | --- | --- |
-| [API JSON del INE](https://www.ine.es/dyngs/DAB/index.htm?cid=1099) | Índice de Precios de Vivienda (IPV), Índice de Referencia de Arrendamientos (IRAV), transmisiones de propiedad, hipotecas | REST, sin clave | Mensual / trimestral |
-| [Atlas de Distribución de Renta de los Hogares](https://www.ine.es/dyngs/INEbase/operacion.htm?c=Estadistica_C&cid=1254736177088) | Renta media y mediana por hogar, a nivel de municipio y sección censal, desde 2015 | Misma API | Anual (≈2 años de desfase) |
-| [SERPAVI](https://www.mivau.gob.es/vivienda/alquila-bien-es-tu-derecho/serpavi) — Ministerio de Vivienda | Precios de referencia del alquiler por municipio | Descarga de ficheros | Anual |
+| [API JSON del INE](https://www.ine.es/dyngs/DAB/index.htm?cid=1099) | IPC provincial (tabla 76141), índice de precios de vivienda en alquiler (59058), compraventas de viviendas (6150), tipo de interés de las hipotecas sobre vivienda (24457, 24460) | REST, sin clave | Mensual / anual |
+| [Atlas de Distribución de Renta de los Hogares](https://www.ine.es/dyngs/INEbase/operacion.htm?c=Estadistica_C&cid=1254736177088) | Renta neta media por hogar y población, por provincia y municipio, 2015–2024 | Misma API (108 tablas) | Anual (≈2 años de desfase) |
+| [Ministerio de Vivienda — boletín estadístico](https://apps.fomento.gob.es/BoletinOnline2/) | Valor tasado medio de la vivienda libre (€/m²): 52 provincias desde 1995 y 306 municipios de más de 25.000 habitantes desde 2005 | Descarga de Excel | Trimestral |
+| [click_that_hood](https://github.com/codeforgermany/click_that_hood) | Contorno de las provincias con su código INE | GeoJSON | — |
 
-El INE es la **capa viva**: se consulta en cada actualización y permite el consumo continuo de datos.
-Atlas y SERPAVI son **capas de referencia** que se refrescan cuando publican nueva edición.
+**Cambio respecto a la propuesta.** El precio en euros sale del valor tasado del Ministerio de Vivienda,
+no del IPV del INE: el IPV es un índice (no da euros, que hacen falta para calcular la cuota) y solo se
+publica por comunidad autónoma. SERPAVI no tiene API ni serie homogénea, así que el esfuerzo de
+alquiler queda como ampliación; el alquiler entra en el modelo a través del índice del INE.
 
-### Limitaciones conocidas
+### Limitaciones, declaradas también en la app
 
-- El Atlas de renta publica con unos **dos años de desfase**. El esfuerzo del trimestre corriente es
-  una estimación, y la aplicación lo señala explícitamente.
-- **SERPAVI no ofrece API**: esa capa se actualiza manualmente por edición.
-- Los códigos de municipio no son homogéneos entre fuentes. La normalización es la etapa más delicada
-  del pipeline y tiene sus propias pruebas.
+- El Atlas de renta llega hasta **2024**. Para 2025–2026 la renta se proyecta con el crecimiento medio de
+  los tres últimos años de cada territorio (acotado entre −2 % y +6 %); los gráficos lo marcan con línea
+  discontinua y **el modelo no se entrena con etiquetas calculadas con renta estimada**.
+- El criterio 1 es una **aproximación por abajo**: la ley suma gastos y suministros básicos a la cuota.
+- El Ministerio solo publica valor tasado de municipios de **más de 25.000 habitantes**.
+- El índice de alquiler del INE no cubre **País Vasco ni Navarra**; el modelo imputa la mediana.
 
 ## Arquitectura
 
 ```
-┌───────────┐   ┌───────────────┐   ┌────────────┐   ┌─────────────────┐
-│  Ingesta  │ → │ Normalización │ → │ Validación │ → │ Cálculo + modelo│ → Dash
-└───────────┘   └───────────────┘   └────────────┘   └─────────────────┘
-  API INE         códigos INE         reglas de        índice esfuerzo
-  SERPAVI         serie temporal      calidad          clasificador
+┌───────────┐   ┌───────────────┐   ┌────────────┐   ┌─────────────────┐   ┌────────────┐
+│  Ingesta  │ → │ Normalización │ → │ Validación │ → │ Cálculo + modelo│ → │ Publicación│ → Dash
+└───────────┘   └───────────────┘   └────────────┘   └─────────────────┘   └────────────┘
+ API INE          nombres → códigos   reglas con       esfuerzo, criterios   data/publicado
+ Excel MIVAU      INE, erratas        motivo, informe  art. 18.3, modelo     (parquet, json)
 ```
 
-| Etapa | Qué hace |
-| --- | --- |
-| **Ingesta** | Cliente de la API del INE con caché en disco, reintentos y control de versión de cada descarga |
-| **Normalización** | Unifica códigos INE de provincia y municipio entre las tres fuentes y alinea series trimestrales con anuales |
-| **Validación** | Reglas explícitas de tipos, rangos, nulos y cobertura. Las filas que no pasan se separan con su motivo y se publica un informe de calidad en JSON |
-| **Cálculo y modelo** | Construye el índice de esfuerzo, evalúa los criterios del art. 18.3 y entrena el modelo. Artefactos serializados para que la app no reentrene al arrancar |
+| Etapa | Módulo | Qué hace |
+| --- | --- | --- |
+| **Ingesta** | `src/descargas.py`, `src/ingesta.py` | Cliente de la API del INE con caché en disco, reintentos con espera exponencial y manifiesto de descargas. Las tablas que superan el límite de volumen de la API se piden año a año. Lectura de los Excel del Ministerio reconstruyendo el trimestre de cada columna. |
+| **Normalización** | `src/normalizacion.py` | El Ministerio da nombres, no códigos. Se traducen a códigos INE con una forma canónica (sin tildes, artículo delante, nombres bilingües), alias y búsqueda por parecido. Empareja los **306** municipios y corrige erratas de la fuente («Córdaba», «Valladodid») y **8 municipios listados bajo otra provincia** (Almuñécar aparece en Córdoba). |
+| **Validación** | `src/validacion.py` | Reglas explícitas de nulos, rangos, duplicados y número mínimo de tasaciones. Las filas que fallan se apartan con su motivo (`data/publicado/filas_rechazadas.csv`) y se resume todo en `calidad.json`, visible en la app. |
+| **Cálculo** | `src/indicadores.py` | Esfuerzo (cuota de un préstamo francés / renta), crecimiento a cinco años frente al IPC y estado legal. Los desfases se buscan por fecha, no por posición, para que un trimestre que falta no desplace la comparación. |
+| **Modelo** | `src/modelo.py` | Ver abajo. |
+| **Orquestación** | `src/pipeline.py` | Ejecuta todo y publica en `data/publicado/` lo que lee la app: la app **no** descarga ni reentrena al arrancar. |
 
 ### Modelo
 
-**Clasificación binaria**: dado el histórico de un territorio, ¿cumplirá alguno de los dos criterios de
-tensionamiento en el horizonte de dos años?
+**Clasificación binaria**: ¿cumplirá el territorio algún criterio dentro de ocho trimestres?
 
-- **Variable objetivo**: el criterio legal, calculable hacia atrás sobre toda la serie. No es una
-  definición propia, lo que la hace defendible y proporciona etiquetas reales.
-- **Features**: nivel y variación de renta, evolución del IPV y del IRAV, diferencial acumulado frente
-  al IPC, intensidad de compraventas e hipotecas por habitante, variables territoriales.
-- **Modelos**: regresión logística regularizada como referencia interpretable, frente a un ensamblado
-  de árboles.
-- **Validación temporal**, no aleatoria: entrenar con el pasado y evaluar con el futuro, para evitar
-  fuga de información entre periodos contiguos.
-- **Métrica principal: recall** sobre la clase tensionada. Dejar de avisar de un territorio que sí se
-  tensiona es un error mucho más costoso que una falsa alarma.
+- **Etiqueta**: el estado legal calculado hacia atrás con la misma regla; no es una definición propia.
+- **Variables** (14): esfuerzo y su distancia al umbral, diferencial precio−IPC, sus cambios en un año,
+  crecimiento del precio y de la renta, tipo de interés y su cambio, nivel de precio, estado actual,
+  compraventas por 1.000 habitantes y su variación, y variación del alquiler. Los municipios reciben las
+  variables de mercado de su provincia.
+- **Modelos**: regresión logística regularizada (interpretable), bosque aleatorio y gradient boosting,
+  todos dentro de un `Pipeline` (imputación y escalado ajustados solo con el entrenamiento).
+- **Validación temporal**: entrenamiento con 2015–2020, prueba con 2021–2022 (cuyas etiquetas son
+  2023–2024, las últimas con renta publicada). Dentro del entrenamiento, ventana creciente por años para
+  elegir modelo y **umbral de decisión** (el que maximiza F2), sin tocar la prueba.
+- **Métrica principal: recall** de la clase tensionada, con F2 para no premiar avisar de todo.
+- **Referencias**: clase mayoritaria y **persistencia** («dentro de dos años estará como hoy»), que es la
+  difícil de batir porque el criterio de precios mira cinco años atrás.
+
+| Provincias, periodo de prueba | Recall | Precisión | AUC |
+| --- | --- | --- | --- |
+| Referencia: persistencia | 78 % | 59 % | — |
+| Regresión logística | 20 % | 100 % | 0,94 |
+| Bosque aleatorio | 94 % | 28 % | 0,92 |
+| **Gradient boosting (elegido)** | **96 %** | 28 % | 0,91 |
+
+A nivel municipal el 61 % de los casos de prueba ya están tensionados, así que predecir siempre
+«tensión» acierta mucho; ahí la AUC (≈0,80) es la medida justa. El notebook
+[`notebooks/exploracion_y_modelo.ipynb`](notebooks/exploracion_y_modelo.ipynb) recoge el análisis.
+
+## El cuadro de mando
+
+| Pestaña | Qué enseña |
+| --- | --- |
+| **Mapa** | Coropleta de provincias para cuatro indicadores (esfuerzo, diferencial, situación legal y probabilidad a dos años), con selector de trimestre desde 2015 y ranking. Pulsar una provincia abre su ficha. |
+| **Ficha territorial** | Provincia o municipio: evolución del esfuerzo (con la renta estimada en discontinua), precio frente a IPC, diferencial, tabla de los últimos trimestres y una **calculadora** para cambiar superficie, financiación, plazo y tipo de interés. |
+| **Municipios** | Los 306 municipios en el plano de los dos criterios y una tabla ordenable y filtrable. |
+| **Predicción** | Modelos frente a referencias, matriz de confusión, importancia de variables y territorios que entrarían en tensión. |
+| **Datos y método** | Cálculo, limitaciones, informe de calidad, municipios corregidos en la normalización, fuentes y descarga del panel en CSV. |
+
+Paleta accesible para daltonismo (Okabe-Ito) en orden fijo, escala secuencial de un solo tono para
+magnitudes y divergente para el diferencial, un único eje Y por gráfico y tablas detrás de los gráficos.
 
 ## Estructura del repositorio
 
 ```
 .
-├── src/              Pipeline por etapas (ingesta, normalización, validación, modelo)
-├── app/              Cuadro de mando en Dash
-├── notebooks/        Exploración y selección de modelo
-├── data/             Artefactos generados (no versionados)
-├── requirements.txt
-└── README.md
+├── src/                 Pipeline por etapas
+│   ├── config.py        Rutas, fuentes, supuestos y umbrales (todo lo decidible, en un sitio)
+│   ├── descargas.py     Cliente del INE y descargas con caché y manifiesto
+│   ├── ingesta.py       Lectura de cada fuente a formato largo
+│   ├── normalizacion.py Nombres → códigos INE
+│   ├── validacion.py    Reglas de calidad e informe
+│   ├── indicadores.py   Esfuerzo y criterios del art. 18.3
+│   ├── modelo.py        Variables, etiquetas, validación temporal y selección
+│   └── pipeline.py      Orquestación y publicación
+├── app/                 Cuadro de mando en Dash (app.py, datos.py, graficos.py, assets/)
+├── tests/               Pruebas de normalización, indicadores y validación (pytest)
+├── notebooks/           Exploración y selección de modelo (ejecutado)
+├── data/publicado/      Artefactos que lee la app (versionados para desplegar sin red)
+├── data/raw, interim/   Descargas y tablas intermedias (no versionadas)
+├── render.yaml          Despliegue en Render
+└── requirements.txt     Dependencias con versión fijada
 ```
 
 ## Puesta en marcha
@@ -117,25 +171,37 @@ cd davd-26-27-cuadrado-angel
 
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 
-python -m src.pipeline           # descarga, normaliza, valida y entrena
+python -m src.pipeline           # descarga (≈4 min la primera vez), normaliza, valida y entrena
+python -m pytest                 # pruebas
 python app/app.py                # http://127.0.0.1:8050/
 ```
 
-## Plan de trabajo
-
-| Fase | Contenido | Fecha |
-| --- | --- | --- |
-| 1 | Ingesta desde la API del INE y normalización de códigos territoriales | Octubre |
-| 2 | Validación, informe de calidad y cálculo del índice de esfuerzo | Octubre |
-| 3 | Cuadro de mando con mapa, series y rankings | Noviembre |
-| 4 | Modelo de clasificación, validación temporal e integración en la app | Noviembre |
-| 5 | Despliegue en Render, documentación y preparación de la exposición | Noviembre – diciembre |
+`python -m src.pipeline --refrescar` vuelve a descargar todas las fuentes; sin esa opción usa la caché.
+La app funciona sin ejecutar el pipeline, porque `data/publicado/` ya viene en el repositorio.
 
 ## Despliegue
 
-Aplicación desplegada en Render: _(pendiente)_
+Render, plan gratuito, con el `render.yaml` del repositorio: *New → Blueprint* y elegir este repositorio.
+La app arranca con `gunicorn app.app:server` y lee `data/publicado/`, así que no necesita red ni
+reentrenar.
+
+Aplicación desplegada: _(pendiente de crear el servicio en Render)_
+
+## Plan de trabajo
+
+| Fase | Contenido | Estado |
+| --- | --- | --- |
+| 0 | Propuesta y repositorio | Hecho (5 oct.) |
+| 1 | Ingesta desde la API del INE y el Ministerio, normalización de códigos territoriales | Hecho |
+| 2 | Validación, informe de calidad y cálculo del índice de esfuerzo | Hecho |
+| 3 | Cuadro de mando con mapa, series, rankings y calculadora | Hecho |
+| 4 | Modelo de clasificación, validación temporal e integración en la app | Hecho |
+| 5 | Despliegue en Render, documentación y preparación de la exposición | En curso |
+
+**Siguientes pasos**: esfuerzo de alquiler con los precios de referencia del SERPAVI, gastos y
+suministros en el criterio 1 para acercarlo a la ley, y actualización automática trimestral.
 
 ## Licencia y atribución
 
