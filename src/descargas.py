@@ -75,12 +75,16 @@ def ine(funcion: str, entrada: str | int, refrescar: bool = False, **parametros)
     url = f"{INE_API}/{funcion}/{entrada}" + (f"?{consulta}" if consulta else "")
     nombre = f"{funcion}_{entrada}" + (f"_{hashlib.md5(consulta.encode()).hexdigest()[:8]}" if consulta else "")
     destino = RAW / "ine" / f"{nombre}.json"
+    aviso = destino.with_suffix(".estado")          # respuesta sin datos ya conocida
+    if aviso.exists() and not refrescar:
+        raise ErrorINE(aviso.read_text(encoding="utf-8"))
     if refrescar or not destino.exists():
         destino.parent.mkdir(parents=True, exist_ok=True)
         contenido = _pedir(url)
         respuesta = json.loads(contenido)           # falla aquí si el INE devuelve algo que no es JSON
         if isinstance(respuesta, dict) and "status" in respuesta:
-            raise ErrorINE(respuesta["status"])     # p. ej. «restricciones de volumen»: no se cachea
+            aviso.write_text(respuesta["status"], encoding="utf-8")
+            raise ErrorINE(respuesta["status"])     # p. ej. «restricciones de volumen»
         destino.write_bytes(contenido)
         _registrar(url, destino)
     return json.loads(destino.read_text(encoding="utf-8"))
