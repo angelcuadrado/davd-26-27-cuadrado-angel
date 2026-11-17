@@ -174,7 +174,7 @@ source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
 
 python -m src.pipeline           # descarga (≈4 min la primera vez), normaliza, valida y entrena
-python -m pytest                 # pruebas
+python -m pytest                 # pruebas (también en GitHub Actions en cada push)
 python app/app.py                # http://127.0.0.1:8050/
 ```
 
