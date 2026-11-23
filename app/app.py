@@ -15,7 +15,7 @@ from dash import Dash, Input, Output, dash_table, dcc, html, no_update
 from dash.exceptions import PreventUpdate
 
 from app import graficos as g
-from app.datos import cargar
+from app.datos import OTROS_NOMBRES, cargar, opciones_busqueda
 from src import config
 from src.indicadores import esfuerzo as calcular_esfuerzo
 
@@ -218,13 +218,13 @@ def pestana_territorio():
         html.Div([
             html.Div([html.Label("Provincia", className="etiqueta-control"),
                       dcc.Dropdown(id="provincia", value="28", clearable=False,
-                                   options=[{"label": n, "value": c} for c, n in sorted(NOMBRES_PROV.items(), key=lambda x: x[1])])],
+                                   options=opciones_busqueda(NOMBRES_PROV, OTROS_NOMBRES))],
                      className="selector"),
             html.Div([html.Label("Municipio (más de 25.000 habitantes)", className="etiqueta-control"),
                       dcc.Dropdown(id="municipio", placeholder="Toda la provincia")], className="selector"),
             html.Div([html.Label("Comparar con (hasta dos provincias)", className="etiqueta-control"),
                       dcc.Dropdown(id="comparar", multi=True, placeholder="Ninguna",
-                                   options=[{"label": n, "value": c} for c, n in sorted(NOMBRES_PROV.items(), key=lambda x: x[1])])],
+                                   options=opciones_busqueda(NOMBRES_PROV, OTROS_NOMBRES))],
                      className="selector"),
         ], className="controles"),
         html.Div(id="tarjetas-territorio", className="fila-tarjetas"),
@@ -273,7 +273,7 @@ def pestana_municipios():
         html.Div([
             html.Div([html.Label("Provincia", className="etiqueta-control"),
                       dcc.Dropdown(id="mun-provincia", multi=True, placeholder="Todas",
-                                   options=[{"label": n, "value": c} for c, n in sorted(NOMBRES_PROV.items(), key=lambda x: x[1])])],
+                                   options=opciones_busqueda(NOMBRES_PROV, OTROS_NOMBRES))],
                      className="selector"),
             html.Div([html.Label("Previsión a dos años", className="etiqueta-control"),
                       dcc.Dropdown(id="mun-escenario", multi=True, placeholder="Todas",
@@ -514,7 +514,7 @@ def clic_en_mapa(clic):
 @app.callback(Output("municipio", "options"), Output("municipio", "value"), Input("provincia", "value"))
 def municipios_de_provincia(provincia):
     d = MUN[(MUN["cod_prov"] == provincia) & (MUN["trimestre"] == ULTIMO)].sort_values("municipio")
-    return [{"label": r.municipio, "value": r.cod_mun} for r in d.itertuples()], None
+    return opciones_busqueda(dict(zip(d["cod_mun"], d["municipio"]))), None
 
 
 def _territorio(provincia, municipio):
