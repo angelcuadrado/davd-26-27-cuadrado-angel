@@ -54,13 +54,38 @@ def _pedir(url: str, intentos: int = 4, timeout: int = 120) -> bytes:
     raise RuntimeError("inalcanzable")
 
 
+FIRMAS = {
+    ".xls": (b"\xd0\xcf\x11\xe0",),            # Excel 97-2003 (contenedor OLE)
+    ".xlsx": (b"PK\x03\x04",),                  # Excel moderno (zip)
+    ".geojson": (b"{",),
+}
+
+
+def contenido_valido(contenido: bytes, sufijo: str) -> bool:
+    """Comprueba la firma del fichero: un servidor que cambia de sitio suele devolver una página
+    HTML con código 200, y sin esta comprobación se guardaría como si fuera el Excel."""
+    firmas = FIRMAS.get(sufijo.lower())
+    return firmas is None or contenido.lstrip()[:8].startswith(firmas)
+
+
 def descargar_fichero(url: str, destino: Path, refrescar: bool = False) -> Path:
-    """Descarga un fichero a data/raw/<destino> salvo que ya esté en caché."""
+    """Descarga un fichero a data/raw/<destino> salvo que ya esté en caché.
+
+    Si lo descargado no tiene el formato esperado, no se toca la copia en caché: se avisa y se
+    sigue con la última versión buena (o se falla si no hay ninguna).
+    """
     destino = RAW / destino
     if destino.exists() and not refrescar:
         return destino
     destino.parent.mkdir(parents=True, exist_ok=True)
-    destino.write_bytes(_pedir(url))
+    contenido = _pedir(url)
+    if not contenido_valido(contenido, destino.suffix):
+        if destino.exists():
+            log.warning("%s no devolvió un %s válido (¿ha cambiado de dirección?). "
+                        "Sigo con la copia en caché.", url, destino.suffix)
+            return destino
+        raise ValueError(f"{url} no devolvió un fichero {destino.suffix} válido")
+    destino.write_bytes(contenido)
     _registrar(url, destino)
     log.info("Descargado %s", destino.name)
     return destino
