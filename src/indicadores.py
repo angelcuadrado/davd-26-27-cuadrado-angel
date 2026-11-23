@@ -3,8 +3,9 @@
 Para cada territorio y trimestre:
 
 - **Esfuerzo**: cuota anual de la hipoteca de una vivienda tipo (90 m² al valor tasado medio,
-  financiada al 80 % a 25 años al tipo medio del trimestre) dividida entre la renta neta media
-  por hogar. Criterio 1: esfuerzo > 30 %.
+  financiada al 80 % a 25 años al tipo medio del trimestre) más los gastos y suministros básicos
+  de la vivienda (gasto medio por hogar de la comunidad autónoma), dividido entre la renta neta
+  media por hogar. Criterio 1: esfuerzo > 30 %. Se guarda también la parte de la hipoteca sola.
 - **Diferencial de precios**: crecimiento acumulado del precio en los cinco años anteriores
   menos el del IPC de la provincia, en puntos. Criterio 2: diferencial > 3 puntos.
 
@@ -82,10 +83,27 @@ def valor_hace(panel: pd.DataFrame, clave: str, columna: str, trimestres: int) -
     return pd.Series(serie.reindex(buscado).to_numpy(), index=panel.index)
 
 
+def gastos_trimestrales(gastos: pd.DataFrame, desde: int, hasta: pd.Period) -> pd.DataFrame:
+    """Gastos anuales de la vivienda por comunidad -> trimestres.
+
+    La EPF empieza en 2016 y se publica con un año de retraso: los años sin dato toman el del
+    año publicado más cercano.
+    """
+    trimestres = pd.period_range(f"{desde}Q1", hasta, freq="Q")
+    rejilla = pd.MultiIndex.from_product([gastos["cod_ccaa"].unique(), trimestres],
+                                         names=["cod_ccaa", "trimestre"]).to_frame(index=False)
+    rejilla["anio"] = rejilla["trimestre"].dt.year
+    rejilla = rejilla.merge(gastos, on=["cod_ccaa", "anio"], how="left")
+    rejilla["gastos_vivienda"] = rejilla.groupby("cod_ccaa")["gastos_vivienda"].transform(lambda s: s.bfill().ffill())
+    return rejilla.drop(columns="anio")
+
+
 def criterios(panel: pd.DataFrame, clave: str) -> pd.DataFrame:
     """Añade esfuerzo, diferencial a cinco años y el estado legal a un panel."""
     panel = panel.sort_values([clave, "trimestre"]).copy()
-    panel["esfuerzo"] = esfuerzo(panel["precio_m2"], panel["renta_hogar"], panel["tipo_interes"])
+    panel["esfuerzo_hipoteca"] = esfuerzo(panel["precio_m2"], panel["renta_hogar"], panel["tipo_interes"])
+    gastos = panel["gastos_vivienda"] if "gastos_vivienda" in panel else 0.0
+    panel["esfuerzo"] = panel["esfuerzo_hipoteca"] + gastos / panel["renta_hogar"]
     v = config.VENTANA_TRIMESTRES
     panel["crec_precio_5a"] = 100 * (panel["precio_m2"] / valor_hace(panel, clave, "precio_m2", v) - 1)
     panel["crec_ipc_5a"] = 100 * (panel["ipc"] / valor_hace(panel, clave, "ipc", v) - 1)
@@ -113,6 +131,7 @@ def panel_provincial(t: dict[str, pd.DataFrame]) -> pd.DataFrame:
     panel["anio"] = panel["trimestre"].dt.year
     panel = panel.merge(alquiler[["cod_prov", "anio", "var_alquiler"]], on=["cod_prov", "anio"], how="left")
     panel = panel.drop(columns="anio").merge(t["provincias"], on="cod_prov", how="left")
+    panel = panel.merge(gastos_trimestrales(t["gastos_vivienda"], 2015, hasta), on=["cod_ccaa", "trimestre"], how="left")
     return criterios(panel, "cod_prov")
 
 
@@ -130,4 +149,5 @@ def panel_municipal(t: dict[str, pd.DataFrame]) -> pd.DataFrame:
                         on=["cod_mun", "trimestre"], how="left")
     panel = panel.merge(t["municipios"][["cod_mun", "municipio"]], on="cod_mun", how="left")
     panel = panel.merge(t["provincias"], on="cod_prov", how="left")
+    panel = panel.merge(gastos_trimestrales(t["gastos_vivienda"], 2015, hasta), on=["cod_ccaa", "trimestre"], how="left")
     return criterios(panel, "cod_mun")

@@ -201,7 +201,10 @@ def pestana_metodo():
                 dcc.Markdown(f"""
 **Criterio 1 · Esfuerzo.** Cuota anual de la hipoteca de una vivienda de **{config.SUPERFICIE_M2} m²** al valor
 tasado medio del trimestre, financiada al **{config.FINANCIACION:.0%}** a **{config.PLAZO_ANIOS} años** al tipo medio
-de las hipotecas sobre vivienda, dividida entre la **renta neta media por hogar**. Se cumple si supera el **30 %**.
+de las hipotecas sobre vivienda, **más los gastos y suministros básicos** (agua, basuras, electricidad, gas y otros
+combustibles, gastos de comunidad y seguro del hogar: gasto medio por hogar de la comunidad autónoma según la
+Encuesta de Presupuestos Familiares), todo dividido entre la **renta neta media por hogar**. Se cumple si supera
+el **30 %**.
 
 **Criterio 2 · Precios.** Crecimiento acumulado del valor tasado en los cinco años anteriores menos el crecimiento
 del IPC de la provincia en el mismo periodo. Se cumple si la diferencia supera **3 puntos**.
@@ -220,8 +223,8 @@ métrica principal el recall de la clase tensionada.
 - **La renta va con retraso.** El Atlas de renta llega hasta **{ANIO_RENTA}**. Para los años posteriores se proyecta
   con el crecimiento medio de los tres últimos años de cada territorio, y los gráficos lo marcan con línea discontinua.
   El modelo **no** se entrena con esas etiquetas estimadas.
-- **El criterio 1 es una aproximación por abajo.** La ley incluye gastos y suministros básicos; aquí solo la cuota
-  de la hipoteca. Un territorio cerca del 30 % probablemente ya lo supera.
+- **Los gastos son una media de la comunidad autónoma.** La Encuesta de Presupuestos Familiares no baja a provincia
+  ni a municipio, y empieza en 2016: 2015 toma el valor de 2016 y 2026 el de 2025.
 - **Valor tasado, no precio de cierre.** Es la serie oficial más larga y homogénea por provincia y municipio.
 - **Solo compra.** El alquiler entra como variable del modelo (índice del INE), pero el INE no publica niveles en
   euros y el SERPAVI no tiene API; el esfuerzo de alquiler queda como ampliación.
@@ -372,7 +375,9 @@ def actualizar_territorio(provincia, municipio, comparar):
     p = pred.loc[codigo] if codigo in pred.index else None
     tarjetas = [
         tarjeta("Situación legal hoy", estado_chip(hoy["tensionado"]), f"{nombre} · {etiqueta(hoy['trimestre'])}", "destacada"),
-        tarjeta("Esfuerzo de compra", pct(hoy["esfuerzo"]), "umbral: 30 %" + (" · renta estimada" if hoy["renta_estimada"] else "")),
+        tarjeta("Esfuerzo de compra", pct(hoy["esfuerzo"]),
+                f"hipoteca {pct(hoy['esfuerzo_hipoteca'])} + gastos {pct(hoy['esfuerzo'] - hoy['esfuerzo_hipoteca'])}"
+                + (" · renta estimada" if hoy["renta_estimada"] else "")),
         tarjeta("Precio − IPC (5 años)", puntos(hoy["diferencial"]), "umbral: +3 puntos"),
         tarjeta("Valor tasado", f"{euros(hoy['precio_m2'])}/m²", f"renta del hogar: {euros(hoy['renta_hogar'])}"),
         tarjeta("Probabilidad en dos años", pct(p["probabilidad"], 0) if p is not None else "—",
@@ -389,7 +394,8 @@ def actualizar_territorio(provincia, municipio, comparar):
     tabla = serie.dropna(subset=["esfuerzo"]).tail(8).iloc[::-1]
     filas = [{"Trimestre": etiqueta(r.trimestre), "€/m²": euros(r.precio_m2), "Renta hogar": euros(r.renta_hogar)
               + (" (est.)" if r.renta_estimada else ""), "Tipo": f"{r.tipo_interes:.2f} %".replace(".", ","),
-              "Esfuerzo": pct(r.esfuerzo), "Precio − IPC": puntos(r.diferencial), "Estado": r.estado or "—"}
+              "Gastos/año": euros(r.gastos_vivienda), "Esfuerzo": pct(r.esfuerzo),
+              "Precio − IPC": puntos(r.diferencial), "Estado": r.estado or "—"}
              for r in tabla.itertuples()]
     return (tarjetas, g.serie_esfuerzo(series), g.serie_precio_ipc(desde, nombre), g.serie_diferencial(desde),
             dash_table.DataTable(filas, [{"name": c, "id": c} for c in filas[0]], **{**ESTILO_TABLA, "page_size": 8}))
@@ -401,13 +407,16 @@ def actualizar_territorio(provincia, municipio, comparar):
 def calculadora(provincia, municipio, superficie, financiacion, plazo, tipo):
     serie, nombre, _, _ = _territorio(provincia, municipio)
     hoy = serie.dropna(subset=["esfuerzo"]).iloc[-1]
-    valor = float(calcular_esfuerzo(hoy["precio_m2"], hoy["renta_hogar"], tipo, superficie, financiacion / 100, plazo))
+    hipoteca = float(calcular_esfuerzo(hoy["precio_m2"], hoy["renta_hogar"], tipo, superficie, financiacion / 100, plazo))
+    gastos = hoy["gastos_vivienda"]
+    valor = hipoteca + gastos / hoy["renta_hogar"]
     precio = hoy["precio_m2"] * superficie
-    cuota = valor * hoy["renta_hogar"] / 12
+    cuota = hipoteca * hoy["renta_hogar"] / 12
     texto = [f"En {nombre}, una vivienda de {superficie} m² cuesta unos ", html.B(euros(precio)),
              f". Con un préstamo del {financiacion} % a {plazo} años al {tipo:.2f} %".replace(".", ","),
-             " la cuota sería de ", html.B(f"{euros(cuota)} al mes"), ": el ", html.B(pct(valor)),
-             " de la renta media del hogar. ", "La diferencia frente al cálculo oficial de la ficha aparece en puntos."]
+             " la cuota sería de ", html.B(f"{euros(cuota)} al mes"), ", más unos ", html.B(f"{euros(gastos / 12)} al mes"),
+             " de gastos y suministros: el ", html.B(pct(valor)), " de la renta media del hogar. ",
+             "La diferencia frente al cálculo oficial de la ficha aparece en puntos."]
     return g.indicador_esfuerzo(valor, hoy["esfuerzo"]), texto
 
 

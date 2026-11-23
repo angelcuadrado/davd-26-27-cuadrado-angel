@@ -27,7 +27,7 @@ from src.validacion import validar
 log = logging.getLogger("pipeline")
 
 COLUMNAS_PANEL = ["trimestre", "precio_m2", "renta_hogar", "renta_estimada", "tipo_interes", "ipc",
-                  "esfuerzo", "crec_precio_5a", "crec_ipc_5a", "diferencial",
+                  "gastos_vivienda", "esfuerzo_hipoteca", "esfuerzo", "crec_precio_5a", "crec_ipc_5a", "diferencial",
                   "criterio_esfuerzo", "criterio_precio", "tensionado"]
 CANARIAS = {"35", "38"}
 DESPLAZAMIENTO_CANARIAS = (6.5, 7.0)        # grados de longitud y latitud

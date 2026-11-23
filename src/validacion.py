@@ -45,6 +45,7 @@ REGLAS = [
     Regla("alquiler", "índice positivo", lambda df: df["indice_alquiler"] > 0),
     Regla("compraventas", "número no negativo", lambda df: df["compraventas"] >= 0),
     Regla("tipo_interes", "tipo entre 0 % y 15 %", _entre("tipo_interes", 0, 15)),
+    Regla("gastos_vivienda", "gasto anual entre 300 y 10.000 €", _entre("gastos_vivienda", 300, 10_000)),
 ]
 
 CLAVES = {
@@ -53,6 +54,7 @@ CLAVES = {
     "poblacion_prov": ["cod_prov", "anio"], "poblacion_mun": ["cod_mun", "anio"],
     "ipc": ["cod_prov", "trimestre"], "alquiler": ["cod_prov", "anio"],
     "compraventas": ["cod_prov", "trimestre"], "tipo_interes": ["trimestre"],
+    "gastos_vivienda": ["cod_ccaa", "anio"],
 }
 
 

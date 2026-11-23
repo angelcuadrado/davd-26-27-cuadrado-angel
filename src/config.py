@@ -26,6 +26,13 @@ TABLA_IPVA_PROVINCIAL = 59058      # Índice de precios de vivienda en alquiler,
 TABLA_COMPRAVENTAS = 6150          # ETDP: compraventa de viviendas por provincias (mensual)
 TABLAS_TIPO_INTERES = [24460, 24457]   # Hipotecas: tipo de interés medio al inicio (mensual)
 OPERACION_ATLAS = "ADRH"           # Atlas de distribución de renta de los hogares
+TABLA_GASTOS_HOGAR = 73993         # EPF: gasto medio por hogar por clases COICOP y comunidad (anual)
+# «Gastos y suministros básicos» del art. 18.3: lo que paga cada mes un hogar por tener la vivienda
+CLASES_GASTOS_VIVIENDA = [
+    "Suministro de agua", "Servicio de recogida de basura", "Electricidad", "Gas",
+    "Combustibles líquidos", "Combustibles sólidos",
+    "Gastos comunitarios y otros servicios relativos a la vivienda", "Seguros ligados a la vivienda",
+]
 
 # --- Supuestos del cálculo del esfuerzo ----------------------------------------------------
 SUPERFICIE_M2 = 90                 # vivienda tipo

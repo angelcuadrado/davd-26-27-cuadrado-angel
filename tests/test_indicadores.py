@@ -62,3 +62,12 @@ def test_renta_se_estima_tras_el_ultimo_anio_publicado():
     assert r.loc[r["anio"] == 2025, "renta_estimada"].all()
     crecimiento = (106 / 100) ** (1 / 3) - 1
     assert r.loc[r["anio"] == 2025, "renta_hogar"].iloc[0] == pytest.approx(106 * (1 + crecimiento) ** 2)
+
+
+def test_gastos_de_la_vivienda_se_suman_al_esfuerzo():
+    n = 21
+    sin_gastos = criterios(_panel(np.full(n, 1_500.0), np.linspace(100, 110, n)), "cod").iloc[-1]
+    con_gastos = criterios(_panel(np.full(n, 1_500.0), np.linspace(100, 110, n)).assign(gastos_vivienda=3_000.0),
+                           "cod").iloc[-1]
+    assert con_gastos["esfuerzo_hipoteca"] == pytest.approx(sin_gastos["esfuerzo"])
+    assert con_gastos["esfuerzo"] == pytest.approx(sin_gastos["esfuerzo"] + 3_000 / 30_000)    # +10 puntos

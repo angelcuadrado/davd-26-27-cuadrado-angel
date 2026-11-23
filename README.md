@@ -49,12 +49,14 @@ delante**. Eso es lo que hace esta aplicación.
 
 - **41 de las 52 provincias** cumplen hoy algún criterio del art. 18.3, casi todas por el **criterio de
   precios**: el valor tasado lleva cinco años creciendo muy por encima del IPC.
-- Por **esfuerzo** solo superan el 30 % **Málaga y Baleares**, con Madrid justo por debajo. Como el
-  cálculo no incluye gastos ni suministros (la ley sí), quien roza el umbral probablemente ya lo supera.
-- Entre los municipios de más de 25.000 habitantes encabezan el esfuerzo **Santa Eulària des Riu,
-  Calvià, Marbella, Fuengirola y Benalmádena**, todos por encima del 38 %.
-- El modelo provincial detecta el **96 %** de los casos que acaban tensionados dos años después, frente
-  al 78 % de la referencia de persistencia, a costa de más falsas alarmas (detalle en la app).
+- Por **esfuerzo** (hipoteca más gastos y suministros, como dice la ley) superan el 30 % **cinco
+  provincias**: Málaga (36 %), Baleares (35 %), Madrid (34 %), Gipuzkoa (31 %) y Barcelona (30 %). Los
+  gastos de la vivienda suman entre 4 y 6 puntos de esfuerzo según la comunidad.
+- Entre los municipios de más de 25.000 habitantes, 74 superan el 30 %; encabezan **Santa Eulària des
+  Riu (52 %), Calvià, Marbella, Fuengirola y Benidorm**, todos por encima del 43 %.
+- La referencia de **persistencia** («dentro de dos años estará como hoy») es muy difícil de batir: el
+  modelo provincial elegido acierta más en sus avisos (precisión 69 % frente a 64 %) pero detecta algo
+  menos (recall 68 % frente a 75 %). Detalle y lectura en la pestaña *Predicción* de la app.
 
 ## Fuentes de datos
 
@@ -66,6 +68,7 @@ Todas públicas, gratuitas y oficiales. Cada descarga queda registrada en `data/
 | [API JSON del INE](https://www.ine.es/dyngs/DAB/index.htm?cid=1099) | IPC provincial (tabla 76141), índice de precios de vivienda en alquiler (59058), compraventas de viviendas (6150), tipo de interés de las hipotecas sobre vivienda (24457, 24460) | REST, sin clave | Mensual / anual |
 | [Atlas de Distribución de Renta de los Hogares](https://www.ine.es/dyngs/INEbase/operacion.htm?c=Estadistica_C&cid=1254736177088) | Renta neta media por hogar y población, por provincia y municipio, 2015–2024 | Misma API (108 tablas) | Anual (≈2 años de desfase) |
 | [Ministerio de Vivienda — boletín estadístico](https://boletinestadistico.transportes.gob.es/2?orden=35000000) | Valor tasado medio de la vivienda libre (€/m²): 52 provincias desde 1995 y 306 municipios de más de 25.000 habitantes desde 2005 | Descarga de Excel | Trimestral |
+| [Encuesta de Presupuestos Familiares (INE)](https://www.ine.es/dyngs/INEbase/operacion.htm?c=Estadistica_C&cid=1254736176806) | Gasto medio por hogar en agua, basuras, electricidad, gas y otros combustibles, gastos de comunidad y seguro del hogar, por comunidad autónoma (tabla 73993), 2016–2025 | Misma API | Anual |
 | [click_that_hood](https://github.com/codeforgermany/click_that_hood) | Contorno de las provincias con su código INE | GeoJSON | — |
 
 **Cambio respecto a la propuesta.** El precio en euros sale del valor tasado del Ministerio de Vivienda,
@@ -78,7 +81,8 @@ alquiler queda como ampliación; el alquiler entra en el modelo a través del í
 - El Atlas de renta llega hasta **2024**. Para 2025–2026 la renta se proyecta con el crecimiento medio de
   los tres últimos años de cada territorio (acotado entre −2 % y +6 %); los gráficos lo marcan con línea
   discontinua y **el modelo no se entrena con etiquetas calculadas con renta estimada**.
-- El criterio 1 es una **aproximación por abajo**: la ley suma gastos y suministros básicos a la cuota.
+- Los **gastos y suministros** son el gasto medio por hogar de la comunidad autónoma: la Encuesta de
+  Presupuestos Familiares no baja a provincia ni municipio. Empieza en 2016 (2015 toma ese valor).
 - El Ministerio solo publica valor tasado de municipios de **más de 25.000 habitantes**.
 - El índice de alquiler del INE no cubre **País Vasco ni Navarra**; el modelo imputa la mediana.
 
@@ -97,7 +101,7 @@ alquiler queda como ampliación; el alquiler entra en el modelo a través del í
 | **Ingesta** | `src/descargas.py`, `src/ingesta.py` | Cliente de la API del INE con caché en disco, reintentos con espera exponencial y manifiesto de descargas. Las tablas que superan el límite de volumen de la API se piden año a año. Lectura de los Excel del Ministerio reconstruyendo el trimestre de cada columna. |
 | **Normalización** | `src/normalizacion.py` | El Ministerio da nombres, no códigos. Se traducen a códigos INE con una forma canónica (sin tildes, artículo delante, nombres bilingües), alias y búsqueda por parecido. Empareja los **306** municipios y corrige erratas de la fuente («Córdaba», «Valladodid») y **8 municipios listados bajo otra provincia** (Almuñécar aparece en Córdoba). |
 | **Validación** | `src/validacion.py` | Reglas explícitas de nulos, rangos, duplicados y número mínimo de tasaciones. Las filas que fallan se apartan con su motivo (`data/publicado/filas_rechazadas.csv`) y se resume todo en `calidad.json`, visible en la app. |
-| **Cálculo** | `src/indicadores.py` | Esfuerzo (cuota de un préstamo francés / renta), crecimiento a cinco años frente al IPC y estado legal. Los desfases se buscan por fecha, no por posición, para que un trimestre que falta no desplace la comparación. |
+| **Cálculo** | `src/indicadores.py` | Esfuerzo ((cuota de un préstamo francés + gastos y suministros) / renta), crecimiento a cinco años frente al IPC y estado legal. Los desfases se buscan por fecha, no por posición, para que un trimestre que falta no desplace la comparación. |
 | **Modelo** | `src/modelo.py` | Ver abajo. |
 | **Orquestación** | `src/pipeline.py` | Ejecuta todo y publica en `data/publicado/` lo que lee la app: la app **no** descarga ni reentrena al arrancar. |
 
@@ -121,13 +125,14 @@ alquiler queda como ampliación; el alquiler entra en el modelo a través del í
 
 | Provincias, periodo de prueba | Recall | Precisión | AUC |
 | --- | --- | --- | --- |
-| Referencia: persistencia | 78 % | 59 % | — |
-| Regresión logística | 20 % | 100 % | 0,94 |
-| Bosque aleatorio | 94 % | 28 % | 0,92 |
-| **Gradient boosting (elegido)** | **96 %** | 28 % | 0,91 |
+| Referencia: persistencia | 75 % | 64 % | — |
+| Regresión logística | 29 % | 94 % | 0,93 |
+| **Bosque aleatorio (elegido)** | 68 % | **69 %** | 0,93 |
+| Gradient boosting | 68 % | 44 % | 0,91 |
 
-A nivel municipal el 61 % de los casos de prueba ya están tensionados, así que predecir siempre
-«tensión» acierta mucho; ahí la AUC (≈0,80) es la medida justa. El notebook
+El modelo se elige por F2 en la validación temporal, no en la prueba; en la prueba no supera el recall
+de la persistencia, y así se cuenta en la app. A nivel municipal el 64 % de los casos de prueba ya están
+tensionados, así que predecir siempre «tensión» acierta mucho; ahí la AUC (≈0,81) es la medida justa. El notebook
 [`notebooks/exploracion_y_modelo.ipynb`](notebooks/exploracion_y_modelo.ipynb) recoge el análisis.
 
 ## El cuadro de mando

@@ -137,6 +137,22 @@ def compraventas_provincial(refrescar: bool = False) -> pd.DataFrame:
             .rename(columns={"Provincias_codigo": "cod_prov", "valor": "compraventas"}))
 
 
+def gastos_vivienda(refrescar: bool = False) -> pd.DataFrame:
+    """Gasto medio anual por hogar en suministros y gastos de la vivienda, por comunidad autónoma.
+
+    Suma las clases de la Encuesta de Presupuestos Familiares listadas en config: agua, basuras,
+    electricidad, gas, otros combustibles, gastos de comunidad y seguro del hogar.
+    """
+    df = _series_ine(config.TABLA_GASTOS_HOGAR, refrescar=refrescar, tv="57:8858")   # gasto medio por hogar
+    df = df[df["Comunidades y Ciudades Autónomas"].notna() & df["Clases COICOP/EPF"].isin(config.CLASES_GASTOS_VIVIENDA)]
+    encontradas = set(df["Clases COICOP/EPF"])
+    faltan = set(config.CLASES_GASTOS_VIVIENDA) - encontradas
+    if faltan:
+        log.warning("Clases de gasto que no aparecen en la EPF: %s", sorted(faltan))
+    return (df.groupby(["Comunidades y Ciudades Autónomas_codigo", "anio"], as_index=False)["valor"].sum()
+              .rename(columns={"Comunidades y Ciudades Autónomas_codigo": "cod_ccaa", "valor": "gastos_vivienda"}))
+
+
 def tipo_interes(refrescar: bool = False) -> pd.DataFrame:
     """Tipo de interés medio de las hipotecas sobre viviendas (nacional), media trimestral."""
     partes = []
@@ -241,7 +257,8 @@ def ingerir_todo(refrescar: bool = False) -> dict[str, pd.DataFrame]:
     fuentes = {
         "renta": renta_atlas, "poblacion": poblacion_atlas, "ipc": ipc_provincial,
         "alquiler": ipva_provincial, "compraventas": compraventas_provincial,
-        "tipo_interes": tipo_interes, "precios_provincias": precios_provincias,
+        "tipo_interes": tipo_interes, "gastos_vivienda": gastos_vivienda,
+        "precios_provincias": precios_provincias,
         "precios_municipios": precios_municipios,
     }
     tablas = {}

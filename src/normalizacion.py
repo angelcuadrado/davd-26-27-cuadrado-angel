@@ -72,6 +72,24 @@ def claves_alternativas(nombre: str) -> set[str]:
     return claves
 
 
+# Comunidad autónoma (código INE) de cada provincia: la EPF solo se publica por comunidad
+CCAA_DE_PROVINCIA = {
+    **dict.fromkeys(["04", "11", "14", "18", "21", "23", "29", "41"], "01"),   # Andalucía
+    **dict.fromkeys(["22", "44", "50"], "02"),                                 # Aragón
+    "33": "03", "07": "04",                                                    # Asturias, Baleares
+    **dict.fromkeys(["35", "38"], "05"), "39": "06",                           # Canarias, Cantabria
+    **dict.fromkeys(["05", "09", "24", "34", "37", "40", "42", "47", "49"], "07"),   # Castilla y León
+    **dict.fromkeys(["02", "13", "16", "19", "45"], "08"),                     # Castilla-La Mancha
+    **dict.fromkeys(["08", "17", "25", "43"], "09"),                           # Cataluña
+    **dict.fromkeys(["03", "12", "46"], "10"),                                 # Comunitat Valenciana
+    **dict.fromkeys(["06", "10"], "11"),                                       # Extremadura
+    **dict.fromkeys(["15", "27", "32", "36"], "12"),                           # Galicia
+    "28": "13", "30": "14", "31": "15",                                        # Madrid, Murcia, Navarra
+    **dict.fromkeys(["01", "20", "48"], "16"),                                 # País Vasco
+    "26": "17", "51": "18", "52": "19",                                        # La Rioja, Ceuta, Melilla
+}
+
+
 def catalogo(renta: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Provincias y municipios con su código y nombre oficial, a partir del Atlas de renta."""
     provincias = (renta[renta["nivel"] == "provincia"]
@@ -82,6 +100,7 @@ def catalogo(renta: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
                   .drop_duplicates("codigo")[["codigo", "territorio"]]
                   .rename(columns={"codigo": "cod_mun", "territorio": "municipio"}))
     municipios["cod_prov"] = municipios["cod_mun"].str[:2]
+    provincias["cod_ccaa"] = provincias["cod_prov"].map(CCAA_DE_PROVINCIA)
     return provincias, municipios.sort_values("cod_mun").reset_index(drop=True)
 
 
@@ -182,7 +201,7 @@ def normalizar(tablas: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.DataFrame]
         "renta_mun": renta[renta["nivel"] == "municipio"].rename(columns={"codigo": "cod_mun"})[["cod_mun", "anio", "renta_hogar"]],
         "poblacion_prov": poblacion[poblacion["nivel"] == "provincia"].rename(columns={"codigo": "cod_prov"})[["cod_prov", "anio", "poblacion"]],
         "poblacion_mun": poblacion[poblacion["nivel"] == "municipio"].rename(columns={"codigo": "cod_mun"})[["cod_mun", "anio", "poblacion"]],
-        "ipc": tablas["ipc"], "alquiler": tablas["alquiler"],
+        "ipc": tablas["ipc"], "alquiler": tablas["alquiler"], "gastos_vivienda": tablas["gastos_vivienda"],
         "compraventas": tablas["compraventas"], "tipo_interes": tablas["tipo_interes"],
     }
 

@@ -16,7 +16,8 @@ COLOR_ESTADO = {"Tensionado": BERMELLON, "Sin tensión": AZUL}
 
 INDICADORES = {
     "esfuerzo": {"titulo": "Esfuerzo de compra", "formato": ".1%", "umbral": 0.30,
-                 "explicacion": "Cuota anual de la hipoteca de una vivienda de 90 m² entre la renta neta media del hogar."},
+                 "explicacion": "Cuota anual de la hipoteca de una vivienda de 90 m² más los gastos y suministros de la "
+                                "vivienda (agua, luz, gas, comunidad y seguro), entre la renta neta media del hogar."},
     "diferencial": {"titulo": "Precio − IPC a cinco años", "formato": "+.1f", "umbral": 3.0, "sufijo": " p.",
                     "explicacion": "Crecimiento acumulado del precio en cinco años menos el del IPC de la provincia, en puntos."},
     "estado": {"titulo": "Situación legal hoy", "explicacion": "Tensionado si cumple al menos uno de los dos criterios del art. 18.3."},

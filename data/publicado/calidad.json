@@ -1,5 +1,5 @@
 {
- "generado": "2026-11-23T11:04:21+00:00",
+ "generado": "2026-11-23T12:24:37+00:00",
  "ultimo_trimestre_precios": "2026Q2",
  "ultimo_anio_renta": 2024,
  "supuestos": {
@@ -111,6 +111,17 @@
    "periodos": 14,
    "cobertura_pct": 100.0
   },
+  "gastos_vivienda": {
+   "filas": 190,
+   "validas": 190,
+   "rechazadas": 0,
+   "rechazadas_por_regla": {},
+   "desde": "2016",
+   "hasta": "2025",
+   "territorios": 19,
+   "periodos": 10,
+   "cobertura_pct": 100.0
+  },
   "compraventas": {
    "filas": 4108,
    "validas": 4108,
@@ -207,9 +218,9 @@
   "municipios_sin_pareja": []
  },
  "fuentes": {
-  "descargas": 128,
+  "descargas": 133,
   "primera": "2026-11-16T14:29:10+00:00",
-  "ultima": "2026-11-23T11:04:04+00:00",
-  "megabytes": 206.6
+  "ultima": "2026-11-23T12:21:13+00:00",
+  "megabytes": 224.3
  }
 }
