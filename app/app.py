@@ -8,8 +8,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))   # para «python app/app.py»
 
+from functools import lru_cache, wraps
+
 import pandas as pd
 from dash import Dash, Input, Output, dash_table, dcc, html, no_update
+from dash.exceptions import PreventUpdate
 
 from app import graficos as g
 from app.datos import cargar
@@ -283,7 +286,27 @@ ESTILO_TABLA = dict(
 
 # --- App -----------------------------------------------------------------------------------
 
-app = Dash(__name__, title="Esfuerzo de acceso a la vivienda", suppress_callback_exceptions=True,
+def en_pestana(nombre: str):
+    """Calcula el callback solo cuando su pestaña está a la vista, y recuerda los resultados.
+
+    Dash crea a la vez el contenido de todas las pestañas, así que sin esto la primera carga
+    calcula las cinco. Con 0,1 CPU en el plan gratuito de Render eso se nota. El último Input del
+    callback debe ser la pestaña activa.
+    """
+    def decorador(funcion):
+        memoria = lru_cache(maxsize=256)(funcion)
+
+        @wraps(funcion)
+        def envoltura(*args):
+            *entradas, activa = args
+            if activa != nombre:
+                raise PreventUpdate
+            return memoria(*(tuple(x) if isinstance(x, list) else x for x in entradas))
+        return envoltura
+    return decorador
+
+
+app = Dash(__name__, title="Esfuerzo de acceso a la vivienda", suppress_callback_exceptions=True, compress=True,
            meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"},
                       {"name": "description", "content": "Cuadro de mando que cruza precio de la vivienda y renta de los hogares y aplica el criterio legal de zona tensionada."}])
 server = app.server
@@ -328,7 +351,9 @@ def _datos_mapa(indicador: str, trimestre: pd.Period) -> pd.DataFrame:
 @app.callback(Output("mapa", "figure"), Output("ranking", "figure"), Output("titulo-ranking", "children"),
               Output("tarjetas-mapa", "children"), Output("etiqueta-trimestre", "children"),
               Output("explicacion-indicador", "children"), Output("trimestre", "disabled"),
-              Input("indicador", "value"), Input("trimestre", "value"), Input("provincia", "value"))
+              Input("indicador", "value"), Input("trimestre", "value"), Input("provincia", "value"),
+              Input("pestanas", "value"))
+@en_pestana("mapa")
 def actualizar_mapa(indicador, posicion, provincia):
     trimestre = TRIMESTRES[posicion]
     d = _datos_mapa(indicador, trimestre)
@@ -379,7 +404,9 @@ def _territorio(provincia, municipio):
               Output("serie-precio", "figure"), Output("serie-diferencial", "figure"),
               Output("serie-compra-alquiler", "figure"),
               Output("tabla-territorio", "children"),
-              Input("provincia", "value"), Input("municipio", "value"), Input("comparar", "value"))
+              Input("provincia", "value"), Input("municipio", "value"), Input("comparar", "value"),
+              Input("pestanas", "value"))
+@en_pestana("territorio")
 def actualizar_territorio(provincia, municipio, comparar):
     serie, nombre, pred, codigo = _territorio(provincia, municipio)
     hoy = serie.dropna(subset=["esfuerzo"]).iloc[-1]
@@ -418,7 +445,9 @@ def actualizar_territorio(provincia, municipio, comparar):
 
 @app.callback(Output("calc-resultado", "figure"), Output("calc-texto", "children"),
               Input("provincia", "value"), Input("municipio", "value"), Input("calc-superficie", "value"),
-              Input("calc-financiacion", "value"), Input("calc-plazo", "value"), Input("calc-tipo", "value"))
+              Input("calc-financiacion", "value"), Input("calc-plazo", "value"), Input("calc-tipo", "value"),
+              Input("pestanas", "value"))
+@en_pestana("territorio")
 def calculadora(provincia, municipio, superficie, financiacion, plazo, tipo):
     serie, nombre, _, _ = _territorio(provincia, municipio)
     hoy = serie.dropna(subset=["esfuerzo"]).iloc[-1]
@@ -438,7 +467,9 @@ def calculadora(provincia, municipio, superficie, financiacion, plazo, tipo):
 # --- Callbacks: municipios -----------------------------------------------------------------
 
 @app.callback(Output("dispersion", "figure"), Output("tabla-municipios", "children"),
-              Input("mun-provincia", "value"), Input("mun-escenario", "value"), Input("municipio", "value"))
+              Input("mun-provincia", "value"), Input("mun-escenario", "value"), Input("municipio", "value"),
+              Input("pestanas", "value"))
+@en_pestana("municipios")
 def actualizar_municipios(provincias, escenarios, destacado):
     d = MUN[MUN["trimestre"] == ULTIMO].merge(
         D["pred_municipios"][["cod_mun", "probabilidad", "escenario"]], on="cod_mun", how="left")
@@ -492,7 +523,8 @@ def lectura(nivel: str, elegido: str, metricas: dict, resumen: dict) -> list:
               Output("comparativa", "figure"), Output("confusion", "figure"),
               Output("texto-confusion", "children"), Output("importancias", "figure"),
               Output("tabla-entraran", "children"), Output("tabla-metricas", "children"),
-              Input("nivel-modelo", "value"))
+              Input("nivel-modelo", "value"), Input("pestanas", "value"))
+@en_pestana("prediccion")
 def actualizar_modelo(nivel):
     info = D["modelo"].get(nivel)
     if not info:

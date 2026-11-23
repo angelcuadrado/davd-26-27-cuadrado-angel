@@ -6,7 +6,8 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app.app:server --workers 2 --timeout 120
+    # Un proceso con varios hilos: con 0,1 CPU, dos procesos solo se quitan CPU el uno al otro
+    startCommand: gunicorn app.app:server --workers 1 --threads 4 --timeout 120
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.8

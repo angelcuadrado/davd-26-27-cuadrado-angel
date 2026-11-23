@@ -79,8 +79,10 @@ def mapa(datos: pd.DataFrame, geojson: dict, indicador: str, seleccion: str | No
                                             ticksuffix=info.get("sufijo", ""), thickness=12, len=0.6, outlinewidth=0))
     fig = go.Figure(traza)
     if seleccion:
+        # Solo el contorno de la provincia elegida: repetir el mapa entero duplicaría lo que viaja al navegador
         fila = datos[datos["cod_prov"] == seleccion]
-        fig.add_trace(go.Choropleth(geojson=geojson, locations=fila["cod_prov"], z=[1] * len(fila),
+        contorno = {"type": "FeatureCollection", "features": [f for f in geojson["features"] if f["id"] == seleccion]}
+        fig.add_trace(go.Choropleth(geojson=contorno, locations=fila["cod_prov"], z=[1] * len(fila),
                                     colorscale=[[0, "rgba(0,0,0,0)"], [1, "rgba(0,0,0,0)"]], showscale=False,
                                     marker_line_color=TINTA, marker_line_width=2.5, hoverinfo="skip"))
     fig.update_geos(fitbounds="locations", visible=False, projection_type="mercator", bgcolor="rgba(0,0,0,0)")

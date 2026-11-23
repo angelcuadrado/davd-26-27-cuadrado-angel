@@ -41,11 +41,12 @@ def _a_texto(df: pd.DataFrame) -> pd.DataFrame:
     return df.assign(**{c: df[c].astype(str) for c in df.columns if isinstance(df[c].dtype, pd.PeriodDtype)})
 
 
-def _simplificar_geojson(origen, destino, decimales: int = 3, paso: int = 2) -> None:
+def _simplificar_geojson(origen, destino, decimales: int = 2, paso: int = 3) -> None:
     """Reduce el mapa de provincias (1,4 MB) para que la app cargue rápido.
 
-    Redondea coordenadas (3 decimales ≈ 100 m) y se queda con uno de cada `paso` vértices en
-    los anillos largos; los pequeños (islas, Ceuta, Melilla) se dejan enteros.
+    Redondea coordenadas (2 decimales ≈ 1 km, de sobra para un mapa de España) y se queda con
+    uno de cada `paso` vértices en los anillos largos; los pequeños (islas, Ceuta, Melilla) se
+    dejan enteros.
     """
     geo = json.loads(origen.read_text(encoding="utf-8"))
 

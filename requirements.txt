@@ -9,3 +9,4 @@ requests==2.34.2
 xlrd==2.0.2
 openpyxl==3.1.5
 gunicorn==27.0.1
+flask-compress==1.26
