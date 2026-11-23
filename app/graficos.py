@@ -31,7 +31,7 @@ INDICADORES = {
 
 def _base(fig: go.Figure, alto: int = 380, leyenda: bool = True) -> go.Figure:
     fig.update_layout(
-        height=alto, margin=dict(l=8, r=12, t=12, b=8), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor=FONDO,
+        height=alto, margin=dict(l=8, r=12, t=12, b=8), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         font=dict(family="Inter, system-ui, -apple-system, Segoe UI, sans-serif", size=13, color=TINTA),
         hoverlabel=dict(bgcolor="white", bordercolor=REJILLA, font=dict(color=TINTA)),
         showlegend=leyenda,

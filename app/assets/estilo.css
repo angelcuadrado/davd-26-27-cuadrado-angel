@@ -1,13 +1,80 @@
 :root {
   --fondo: #f6f5f1;
   --superficie: #ffffff;
+  --superficie-suave: #f3f1ec;
   --tinta: #3d3d3a;
   --tinta-suave: #73726c;
   --borde: #e8e6e1;
+  --rejilla: #e8e6e1;
   --azul: #0072B2;
   --bermellon: #D55E00;
   --radio: 12px;
+  /* Controles de Dash 4 con los colores del proyecto */
+  --Dash-Fill-Interactive-Strong: #3d3d3a;
+  --Dash-Text-Primary: #3d3d3a;
+  --Dash-Text-Strong: #22221f;
+  --Dash-Text-Weak: #73726c;
+  --Dash-Fill-Inverse-Strong: #ffffff;
 }
+
+/* Tema oscuro: mismos tonos de marca, superficies oscuras y tinta clara */
+:root[data-tema="oscuro"] {
+  --fondo: #1a1a19;
+  --superficie: #242422;
+  --superficie-suave: #2e2e2b;
+  --tinta: #e8e6e1;
+  --tinta-suave: #a8a69f;
+  --borde: #3a3936;
+  --rejilla: #3a3936;
+  --azul: #56B4E9;
+  --Dash-Fill-Interactive-Strong: #e8e6e1;
+  --Dash-Fill-Interactive-Weak: rgba(255, 255, 255, 0.06);
+  --Dash-Fill-Primary-Hover: rgba(255, 255, 255, 0.06);
+  --Dash-Fill-Primary-Active: rgba(255, 255, 255, 0.1);
+  --Dash-Fill-Inverse-Strong: #242422;
+  --Dash-Text-Primary: #e8e6e1;
+  --Dash-Text-Strong: #f5f4ef;
+  --Dash-Text-Weak: #a8a69f;
+  --Dash-Text-Disabled: #77756f;
+  --Dash-Stroke-Weak: #3a3936;
+  --Dash-Stroke-Strong: #5a5955;
+  color-scheme: dark;
+}
+
+body { transition: background-color 0.2s ease, color 0.2s ease; }
+
+.boton-tema {
+  background: var(--superficie); color: var(--tinta); border: 1px solid var(--borde);
+  border-radius: 999px; padding: 3px 12px; font: inherit; font-size: 13px; cursor: pointer;
+}
+.boton-tema:hover { border-color: var(--tinta-suave); }
+
+/* Gráficos de Plotly: el texto y la rejilla siguen al tema (los colores de los datos no cambian) */
+.js-plotly-plot .main-svg text { fill: var(--tinta) !important; }
+.js-plotly-plot .gridlayer path, .js-plotly-plot .zerolinelayer path { stroke: var(--rejilla) !important; }
+.js-plotly-plot .heatmaplayer text { fill: #3d3d3a !important; }        /* celdas claras: tinta oscura */
+/* Líneas de umbral y series dibujadas en tinta: que sigan a la tinta del tema */
+.js-plotly-plot path[style*="stroke: rgb(61, 61, 58)"] { stroke: var(--tinta) !important; }
+.js-plotly-plot .hoverlayer text { fill: #3d3d3a !important; }           /* las etiquetas flotantes son blancas */
+:root[data-tema="oscuro"] .js-plotly-plot .choroplethlayer .trace:not(:first-child) path { stroke: #f5f4ef !important; }
+
+/* Tablas de Dash */
+.dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner th {
+  background-color: var(--superficie-suave) !important; color: var(--tinta) !important;
+}
+.dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner td {
+  background-color: var(--superficie) !important; color: var(--tinta) !important;
+  border-bottom-color: var(--borde) !important;
+}
+.dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner input {
+  background-color: var(--superficie) !important; color: var(--tinta) !important;
+}
+:root[data-tema="oscuro"] .chip { background: #34332f; color: var(--tinta); }
+:root[data-tema="oscuro"] .chip-tension { background: #4a2a17; color: #ffb27a; }
+:root[data-tema="oscuro"] .chip-ok { background: #16324a; color: #9fd3f5; }
+:root[data-tema="oscuro"] .aviso { background: #2f2a1f; border-color: #4a4130; }
+:root[data-tema="oscuro"] .boton { background: var(--tinta); color: var(--fondo); }
+:root[data-tema="oscuro"] .tarjeta.destacada { border-color: #4a4945; }
 
 * { box-sizing: border-box; }
 
@@ -50,6 +117,8 @@ body {
   border-bottom: 2px solid var(--tinta) !important;
 }
 .tab-container { border-bottom: 1px solid var(--borde); }
+.pestanas .tab { color: var(--tinta-suave) !important; }
+.pestanas .tab--selected { color: var(--tinta) !important; }
 
 /* Tarjetas de cifras */
 .fila-tarjetas {

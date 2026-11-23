@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))   # para «pytho
 from functools import lru_cache, wraps
 
 import pandas as pd
-from dash import Dash, Input, Output, dash_table, dcc, html, no_update
+from dash import Dash, Input, Output, State, dash_table, dcc, html, no_update
 from dash.exceptions import PreventUpdate
 
 from app import graficos as g
@@ -443,7 +443,10 @@ app.layout = html.Div([
                     html.B("zona tensionada"), " (art. 18.3 de la Ley 12/2023), con previsión a dos años."]),
         ]),
         html.Div([html.Span(f"Precios hasta {etiqueta(ULTIMO)}", className="chip"),
-                  html.Span(f"Renta publicada hasta {ANIO_RENTA}", className="chip")], className="chips"),
+                  html.Span(f"Renta publicada hasta {ANIO_RENTA}", className="chip"),
+                  html.Button("Modo oscuro", id="boton-tema", className="boton-tema", n_clicks=0,
+                              title="Cambiar entre tema claro y oscuro")], className="chips"),
+        dcc.Store(id="tema", storage_type="local"),
     ], className="cabecera"),
     dcc.Tabs(id="pestanas", value="mapa", className="pestanas", children=[
         dcc.Tab(label="Cómo leerlo", value="guia", children=pestana_guia()),
@@ -456,6 +459,25 @@ app.layout = html.Div([
     html.Footer(["Ángel Cuadrado Serrano · Desarrollo de Aplicaciones para la Visualización de Datos · ICAI 2026-2027 · ",
                  html.A("Código en GitHub", href="https://github.com/angelcuadrado/davd-26-27-cuadrado-angel", target="_blank")]),
 ], className="contenedor")
+
+
+# --- Tema claro / oscuro (en el navegador, sin pasar por el servidor) ----------------------
+
+app.clientside_callback(
+    """
+    function (clics, guardado) {
+        // Primera visita: el tema del sistema operativo. Después, lo último que eligió la persona.
+        let tema = guardado || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oscuro' : 'claro');
+        if (clics > 0 && window.dash_clientside.callback_context.triggered.some(t => t.prop_id.startsWith('boton-tema'))) {
+            tema = tema === 'oscuro' ? 'claro' : 'oscuro';
+        }
+        document.documentElement.dataset.tema = tema;
+        return [tema, tema === 'oscuro' ? 'Modo claro' : 'Modo oscuro'];
+    }
+    """,
+    Output("tema", "data"), Output("boton-tema", "children"),
+    Input("boton-tema", "n_clicks"), State("tema", "data"),
+)
 
 
 # --- Callbacks: mapa -----------------------------------------------------------------------
