@@ -13,9 +13,10 @@ PUBLICADO = DATA / "publicado"     # lo que consume la app: versionado para desp
 
 # --- Fuentes -------------------------------------------------------------------------------
 INE_API = "https://servicios.ine.es/wstempus/js/ES"
-MIVAU_BOLETIN = "https://apps.fomento.gob.es/BoletinOnline2/sedal"
-MIVAU_PROVINCIAS = f"{MIVAU_BOLETIN}/35101000.XLS"     # valor tasado €/m², provincias, trimestral
-MIVAU_MUNICIPIOS = f"{MIVAU_BOLETIN}/35103500.XLS"     # valor tasado €/m², municipios > 25.000 hab.
+# El boletín estadístico se mudó en noviembre de 2026 (antes: apps.fomento.gob.es/BoletinOnline2/sedal)
+MIVAU_BOLETIN = "https://cdn.transportes.gob.es/estadistica/BoletinOnline2"
+MIVAU_PROVINCIAS = f"{MIVAU_BOLETIN}/35101000.xls"     # valor tasado €/m², provincias, trimestral
+MIVAU_MUNICIPIOS = f"{MIVAU_BOLETIN}/35103500.xls"     # valor tasado €/m², municipios > 25.000 hab.
 GEOJSON_PROVINCIAS = ("https://raw.githubusercontent.com/codeforgermany/click_that_hood/"
                       "main/public/data/spain-provinces.geojson")
 

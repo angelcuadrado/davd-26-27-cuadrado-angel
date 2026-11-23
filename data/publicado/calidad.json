@@ -1,5 +1,5 @@
 {
- "generado": "2026-11-16T15:24:52+00:00",
+ "generado": "2026-11-23T11:04:21+00:00",
  "ultimo_trimestre_precios": "2026Q2",
  "ultimo_anio_renta": 2024,
  "supuestos": {
@@ -112,14 +112,14 @@
    "cobertura_pct": 100.0
   },
   "compraventas": {
-   "filas": 4056,
-   "validas": 4056,
+   "filas": 4108,
+   "validas": 4108,
    "rechazadas": 0,
    "rechazadas_por_regla": {},
    "desde": "2007Q1",
-   "hasta": "2026Q2",
+   "hasta": "2026Q3",
    "territorios": 52,
-   "periodos": 78,
+   "periodos": 79,
    "cobertura_pct": 100.0
   },
   "tipo_interes": {
@@ -208,8 +208,8 @@
  },
  "fuentes": {
   "descargas": 128,
-  "primera": "2026-11-16T14:29:04+00:00",
-  "ultima": "2026-11-16T14:41:14+00:00",
+  "primera": "2026-11-16T14:29:10+00:00",
+  "ultima": "2026-11-23T11:04:04+00:00",
   "megabytes": 206.6
  }
 }
