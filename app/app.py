@@ -35,7 +35,7 @@ def pct(x, decimales=1):
 
 
 def puntos(x):
-    return "—" if pd.isna(x) else f"{x:+.1f} p.".replace(".", ",")
+    return "—" if pd.isna(x) else f"{x:+.1f}".replace(".", ",") + " p."
 
 
 def euros(x):
@@ -413,7 +413,7 @@ def calculadora(provincia, municipio, superficie, financiacion, plazo, tipo):
     precio = hoy["precio_m2"] * superficie
     cuota = hipoteca * hoy["renta_hogar"] / 12
     texto = [f"En {nombre}, una vivienda de {superficie} m² cuesta unos ", html.B(euros(precio)),
-             f". Con un préstamo del {financiacion} % a {plazo} años al {tipo:.2f} %".replace(".", ","),
+             f". Con un préstamo del {financiacion} % a {plazo} años al " + f"{tipo:.2f} %".replace(".", ","),
              " la cuota sería de ", html.B(f"{euros(cuota)} al mes"), ", más unos ", html.B(f"{euros(gastos / 12)} al mes"),
              " de gastos y suministros: el ", html.B(pct(valor)), " de la renta media del hogar. ",
              "La diferencia frente al cálculo oficial de la ficha aparece en puntos."]
