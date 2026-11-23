@@ -1,5 +1,7 @@
 # Mapa del esfuerzo de acceso a la vivienda en España
 
+**App en línea: <https://esfuerzo-vivienda.onrender.com/>**
+
 Cuadro de mando interactivo que cruza el precio de la vivienda con la renta de los hogares a escala
 territorial, aplica el criterio legal de **zona de mercado residencial tensionado** y predice qué
 territorios lo cumplirán en los próximos dos años.
@@ -187,7 +189,9 @@ Render, plan gratuito, con el `render.yaml` del repositorio: *New → Blueprint*
 La app arranca con `gunicorn app.app:server` y lee `data/publicado/`, así que no necesita red ni
 reentrenar.
 
-Aplicación desplegada: _(pendiente de crear el servicio en Render)_
+**Aplicación desplegada: <https://esfuerzo-vivienda.onrender.com/>**
+
+Plan gratuito de Render: si nadie la visita en un rato se duerme, y la primera carga tarda unos 50 segundos.
 
 ## Plan de trabajo
 
@@ -198,7 +202,7 @@ Aplicación desplegada: _(pendiente de crear el servicio en Render)_
 | 2 | Validación, informe de calidad y cálculo del índice de esfuerzo | Hecho |
 | 3 | Cuadro de mando con mapa, series, rankings y calculadora | Hecho |
 | 4 | Modelo de clasificación, validación temporal e integración en la app | Hecho |
-| 5 | Despliegue en Render, documentación y preparación de la exposición | En curso |
+| 5 | Despliegue en Render, documentación y preparación de la exposición | Desplegada; exposición en preparación |
 
 **Siguientes pasos**: esfuerzo de alquiler con los precios de referencia del SERPAVI, gastos y
 suministros en el criterio 1 para acercarlo a la ley, y actualización automática trimestral.
