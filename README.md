@@ -146,6 +146,7 @@ tensionados, así que predecir siempre «tensión» acierta mucho; ahí la AUC (
 
 | Pestaña | Qué enseña |
 | --- | --- |
+| **Cómo leerlo** | Qué es una zona tensionada, los dos criterios con un ejemplo real calculado con los datos de Madrid, glosario de todos los términos y guía de uso. |
 | **Mapa** | Coropleta de provincias para cinco indicadores (esfuerzo de compra, esfuerzo de alquiler, diferencial, situación legal y probabilidad a dos años), con selector de trimestre desde 2015 y ranking. Pulsar una provincia abre su ficha. |
 | **Ficha territorial** | Provincia o municipio, comparable con hasta dos provincias más: evolución del esfuerzo (con la renta estimada en discontinua), comprar frente a alquilar, precio frente a IPC, diferencial, tabla de los últimos trimestres y una **calculadora** para cambiar superficie, financiación, plazo y tipo de interés. |
 | **Municipios** | Los 306 municipios en el plano de los dos criterios y una tabla ordenable y filtrable. |
@@ -198,8 +199,9 @@ La app funciona sin ejecutar el pipeline, porque `data/publicado/` ya viene en e
 ## Despliegue
 
 Render, plan gratuito, con el `render.yaml` del repositorio: *New → Blueprint* y elegir este repositorio.
-La app arranca con `gunicorn app.app:server` y lee `data/publicado/`, así que no necesita red ni
-reentrenar.
+La app arranca con `gunicorn app.app:server --workers 1 --threads 4` y lee `data/publicado/`, así que
+no necesita red ni reentrenar. Con los 0,1 CPU del plan gratuito, cada pestaña se calcula solo cuando
+está a la vista, los resultados se guardan en memoria y las respuestas van comprimidas.
 
 **Aplicación desplegada: <https://esfuerzo-vivienda.onrender.com/>**
 
