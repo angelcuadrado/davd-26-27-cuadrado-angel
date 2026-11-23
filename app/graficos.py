@@ -111,7 +111,7 @@ def ranking(datos: pd.DataFrame, indicador: str, nombre: str, n: int = 15) -> go
 def serie_esfuerzo(series: dict[str, pd.DataFrame]) -> go.Figure:
     """Esfuerzo a lo largo del tiempo para uno o varios territorios, con el umbral del 30 %."""
     fig = go.Figure()
-    for (nombre, df), color in zip(series.items(), [AZUL, NARANJA, VERDE]):
+    for (nombre, df), color in zip(series.items(), [AZUL, NARANJA, VERDE, BERMELLON]):
         df = df.dropna(subset=["esfuerzo"])
         real = df[~df["renta_estimada"].astype(bool)]
         estimado = df[df["renta_estimada"].astype(bool)]

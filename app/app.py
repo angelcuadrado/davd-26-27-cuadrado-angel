@@ -95,6 +95,10 @@ def pestana_territorio():
                      className="selector"),
             html.Div([html.Label("Municipio (más de 25.000 habitantes)", className="etiqueta-control"),
                       dcc.Dropdown(id="municipio", placeholder="Toda la provincia")], className="selector"),
+            html.Div([html.Label("Comparar con (hasta dos provincias)", className="etiqueta-control"),
+                      dcc.Dropdown(id="comparar", multi=True, placeholder="Ninguna",
+                                   options=[{"label": n, "value": c} for c, n in sorted(NOMBRES_PROV.items(), key=lambda x: x[1])])],
+                     className="selector"),
         ], className="controles"),
         html.Div(id="tarjetas-territorio", className="fila-tarjetas"),
         html.Div([
@@ -361,8 +365,8 @@ def _territorio(provincia, municipio):
 @app.callback(Output("tarjetas-territorio", "children"), Output("serie-esfuerzo", "figure"),
               Output("serie-precio", "figure"), Output("serie-diferencial", "figure"),
               Output("tabla-territorio", "children"),
-              Input("provincia", "value"), Input("municipio", "value"))
-def actualizar_territorio(provincia, municipio):
+              Input("provincia", "value"), Input("municipio", "value"), Input("comparar", "value"))
+def actualizar_territorio(provincia, municipio, comparar):
     serie, nombre, pred, codigo = _territorio(provincia, municipio)
     hoy = serie.dropna(subset=["esfuerzo"]).iloc[-1]
     p = pred.loc[codigo] if codigo in pred.index else None
@@ -377,6 +381,9 @@ def actualizar_territorio(provincia, municipio):
     series = {nombre: serie}
     if municipio:
         series[NOMBRES_PROV[provincia]] = PROV[PROV["cod_prov"] == provincia]
+    for otra in (comparar or [])[:2]:                    # como mucho cuatro líneas en el gráfico
+        if otra != provincia or municipio:
+            series.setdefault(NOMBRES_PROV[otra], PROV[PROV["cod_prov"] == otra])
     series = {k: v[v["trimestre"] >= PRIMERO] for k, v in series.items()}
     desde = serie[serie["trimestre"] >= PRIMERO - 20]
     tabla = serie.dropna(subset=["esfuerzo"]).tail(8).iloc[::-1]

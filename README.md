@@ -63,7 +63,7 @@ Todas públicas, gratuitas y oficiales. Cada descarga queda registrada en `data/
 | --- | --- | --- | --- |
 | [API JSON del INE](https://www.ine.es/dyngs/DAB/index.htm?cid=1099) | IPC provincial (tabla 76141), índice de precios de vivienda en alquiler (59058), compraventas de viviendas (6150), tipo de interés de las hipotecas sobre vivienda (24457, 24460) | REST, sin clave | Mensual / anual |
 | [Atlas de Distribución de Renta de los Hogares](https://www.ine.es/dyngs/INEbase/operacion.htm?c=Estadistica_C&cid=1254736177088) | Renta neta media por hogar y población, por provincia y municipio, 2015–2024 | Misma API (108 tablas) | Anual (≈2 años de desfase) |
-| [Ministerio de Vivienda — boletín estadístico](https://apps.fomento.gob.es/BoletinOnline2/) | Valor tasado medio de la vivienda libre (€/m²): 52 provincias desde 1995 y 306 municipios de más de 25.000 habitantes desde 2005 | Descarga de Excel | Trimestral |
+| [Ministerio de Vivienda — boletín estadístico](https://boletinestadistico.transportes.gob.es/2?orden=35000000) | Valor tasado medio de la vivienda libre (€/m²): 52 provincias desde 1995 y 306 municipios de más de 25.000 habitantes desde 2005 | Descarga de Excel | Trimestral |
 | [click_that_hood](https://github.com/codeforgermany/click_that_hood) | Contorno de las provincias con su código INE | GeoJSON | — |
 
 **Cambio respecto a la propuesta.** El precio en euros sale del valor tasado del Ministerio de Vivienda,
@@ -133,7 +133,7 @@ A nivel municipal el 61 % de los casos de prueba ya están tensionados, así que
 | Pestaña | Qué enseña |
 | --- | --- |
 | **Mapa** | Coropleta de provincias para cuatro indicadores (esfuerzo, diferencial, situación legal y probabilidad a dos años), con selector de trimestre desde 2015 y ranking. Pulsar una provincia abre su ficha. |
-| **Ficha territorial** | Provincia o municipio: evolución del esfuerzo (con la renta estimada en discontinua), precio frente a IPC, diferencial, tabla de los últimos trimestres y una **calculadora** para cambiar superficie, financiación, plazo y tipo de interés. |
+| **Ficha territorial** | Provincia o municipio, comparable con hasta dos provincias más: evolución del esfuerzo (con la renta estimada en discontinua), precio frente a IPC, diferencial, tabla de los últimos trimestres y una **calculadora** para cambiar superficie, financiación, plazo y tipo de interés. |
 | **Municipios** | Los 306 municipios en el plano de los dos criterios y una tabla ordenable y filtrable. |
 | **Predicción** | Modelos frente a referencias, matriz de confusión, importancia de variables y territorios que entrarían en tensión. |
 | **Datos y método** | Cálculo, limitaciones, informe de calidad, municipios corregidos en la normalización, fuentes y descarga del panel en CSV. |
