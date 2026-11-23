@@ -99,6 +99,13 @@ body {
 .tarjeta-grafico h3 { font-size: 16px; margin: 0 0 4px; }
 .tarjeta-grafico h3 + .nota { margin-top: 0; }
 
+.glosario {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px 24px; margin: 8px 0 0;
+}
+.termino dt { font-weight: 650; margin-bottom: 2px; }
+.termino dd { margin: 0; color: var(--tinta); font-size: 14px; }
+
 .calculadora { display: grid; grid-template-columns: 1fr; gap: 2px; margin: 8px 0; }
 .calculadora label { font-size: 13px; color: var(--tinta-suave); margin-top: 6px; }
 
