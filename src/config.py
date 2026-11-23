@@ -17,6 +17,9 @@ INE_API = "https://servicios.ine.es/wstempus/js/ES"
 MIVAU_BOLETIN = "https://cdn.transportes.gob.es/estadistica/BoletinOnline2"
 MIVAU_PROVINCIAS = f"{MIVAU_BOLETIN}/35101000.xls"     # valor tasado €/m², provincias, trimestral
 MIVAU_MUNICIPIOS = f"{MIVAU_BOLETIN}/35103500.xls"     # valor tasado €/m², municipios > 25.000 hab.
+# SERPAVI (Ministerio de Vivienda): alquiler mediano por provincia y municipio, a partir del IRPF
+SERPAVI = ("https://cdn.mivau.gob.es/portal-web-mivau/vivienda/serpavi/"
+           "2026-03_09_bd_SERPAVI_2011-2024%20-%20DEFINITIVO%20WEB_v2.xlsx")
 GEOJSON_PROVINCIAS = ("https://raw.githubusercontent.com/codeforgermany/click_that_hood/"
                       "main/public/data/spain-provinces.geojson")
 

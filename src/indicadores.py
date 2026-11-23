@@ -34,31 +34,32 @@ def esfuerzo(precio_m2, renta_hogar, tipo_anual_pct, superficie=config.SUPERFICI
     return cuota_mensual(capital, tipo_anual_pct, anios) * 12 / np.asarray(renta_hogar, dtype=float)
 
 
-def renta_trimestral(renta: pd.DataFrame, clave: str, hasta: pd.Period) -> pd.DataFrame:
-    """Pasa la renta anual a trimestres y estima los años que el Atlas aún no ha publicado.
+def anual_a_trimestral(df: pd.DataFrame, clave: str, columna: str, marca: str, hasta: pd.Period) -> pd.DataFrame:
+    """Pasa una serie anual a trimestres y estima los años que la fuente aún no ha publicado.
 
-    El Atlas va con unos dos años de retraso. Para los años sin dato se proyecta la última renta
-    con el crecimiento anual medio de los tres últimos años del propio territorio (acotado
-    entre −2 % y +6 %), y se marca la fila como estimada.
+    Los huecos intermedios se interpolan. Después del último año publicado se proyecta con el
+    crecimiento anual medio de los tres últimos años del propio territorio (acotado entre −2 % y
+    +6 %), y la fila se marca como estimada en la columna `marca`.
     """
     filas = []
-    ultimo_anio = hasta.year
-    for codigo, grupo in renta.sort_values("anio").groupby(clave):
-        serie = grupo.set_index("anio")["renta_hogar"]
+    for codigo, grupo in df.sort_values("anio").groupby(clave):
+        serie = grupo.set_index("anio")[columna]
         ultimo = serie.index.max()
-        if len(serie) >= 4:
-            crecimiento = (serie.iloc[-1] / serie.iloc[-4]) ** (1 / 3) - 1
-        else:
-            crecimiento = 0.0
+        serie = serie.reindex(range(serie.index.min(), ultimo + 1)).interpolate()
+        crecimiento = (serie.iloc[-1] / serie.iloc[-4]) ** (1 / 3) - 1 if len(serie) >= 4 else 0.0
         crecimiento = float(np.clip(crecimiento, -0.02, 0.06))
-        for anio in range(serie.index.min(), ultimo_anio + 1):
-            estimada = anio > ultimo
-            valor = serie.get(anio, serie.iloc[-1] * (1 + crecimiento) ** (anio - ultimo))
-            filas.append((codigo, anio, valor, estimada))
-    anual = pd.DataFrame(filas, columns=[clave, "anio", "renta_hogar", "renta_estimada"])
+        for anio in range(serie.index.min(), hasta.year + 1):
+            valor = serie[anio] if anio <= ultimo else serie.iloc[-1] * (1 + crecimiento) ** (anio - ultimo)
+            filas.append((codigo, anio, valor, anio > ultimo))
+    anual = pd.DataFrame(filas, columns=[clave, "anio", columna, marca])
     trimestres = pd.DataFrame({"trimestre": pd.period_range(f"{anual['anio'].min()}Q1", hasta, freq="Q")})
     trimestres["anio"] = trimestres["trimestre"].dt.year
     return anual.merge(trimestres, on="anio")
+
+
+def renta_trimestral(renta: pd.DataFrame, clave: str, hasta: pd.Period) -> pd.DataFrame:
+    """Renta anual -> trimestres. El Atlas va con unos dos años de retraso: lo demás se estima."""
+    return anual_a_trimestral(renta, clave, "renta_hogar", "renta_estimada", hasta)
 
 
 def _ultimo_conocido(df: pd.DataFrame, clave: str, columna: str, hasta: pd.Period) -> pd.DataFrame:
@@ -104,11 +105,16 @@ def criterios(panel: pd.DataFrame, clave: str) -> pd.DataFrame:
     panel["esfuerzo_hipoteca"] = esfuerzo(panel["precio_m2"], panel["renta_hogar"], panel["tipo_interes"])
     gastos = panel["gastos_vivienda"] if "gastos_vivienda" in panel else 0.0
     panel["esfuerzo"] = panel["esfuerzo_hipoteca"] + gastos / panel["renta_hogar"]
+    # Alquiler: la misma carga si el hogar alquila en vez de comprar (alquiler anual + gastos)
+    alquiler = panel["alquiler_mes"] if "alquiler_mes" in panel else np.nan
+    panel["esfuerzo_alquiler"] = (12 * alquiler + gastos) / panel["renta_hogar"]
     v = config.VENTANA_TRIMESTRES
     panel["crec_precio_5a"] = 100 * (panel["precio_m2"] / valor_hace(panel, clave, "precio_m2", v) - 1)
     panel["crec_ipc_5a"] = 100 * (panel["ipc"] / valor_hace(panel, clave, "ipc", v) - 1)
     panel["diferencial"] = panel["crec_precio_5a"] - panel["crec_ipc_5a"]
-    panel["criterio_esfuerzo"] = (panel["esfuerzo"] > config.UMBRAL_ESFUERZO).where(panel["esfuerzo"].notna())
+    # La ley dice «hipoteca o alquiler»: basta con que una de las dos cargas supere el umbral
+    mayor = panel[["esfuerzo", "esfuerzo_alquiler"]].max(axis=1)
+    panel["criterio_esfuerzo"] = (mayor > config.UMBRAL_ESFUERZO).where(panel["esfuerzo"].notna())
     panel["criterio_precio"] = (panel["diferencial"] > config.UMBRAL_DIFERENCIAL).where(panel["diferencial"].notna())
     ambos_conocidos = panel["criterio_esfuerzo"].notna() & panel["criterio_precio"].notna()
     panel["tensionado"] = (panel["criterio_esfuerzo"].fillna(False).astype(bool)
@@ -132,6 +138,8 @@ def panel_provincial(t: dict[str, pd.DataFrame]) -> pd.DataFrame:
     panel = panel.merge(alquiler[["cod_prov", "anio", "var_alquiler"]], on=["cod_prov", "anio"], how="left")
     panel = panel.drop(columns="anio").merge(t["provincias"], on="cod_prov", how="left")
     panel = panel.merge(gastos_trimestrales(t["gastos_vivienda"], 2015, hasta), on=["cod_ccaa", "trimestre"], how="left")
+    panel = panel.merge(anual_a_trimestral(t["alquiler_prov"], "cod_prov", "alquiler_mes", "alquiler_estimado", hasta)
+                        .drop(columns="anio"), on=["cod_prov", "trimestre"], how="left")
     return criterios(panel, "cod_prov")
 
 
@@ -150,4 +158,7 @@ def panel_municipal(t: dict[str, pd.DataFrame]) -> pd.DataFrame:
     panel = panel.merge(t["municipios"][["cod_mun", "municipio"]], on="cod_mun", how="left")
     panel = panel.merge(t["provincias"], on="cod_prov", how="left")
     panel = panel.merge(gastos_trimestrales(t["gastos_vivienda"], 2015, hasta), on=["cod_ccaa", "trimestre"], how="left")
+    alquiler = t["alquiler_mun"][t["alquiler_mun"]["cod_mun"].isin(municipios)]
+    panel = panel.merge(anual_a_trimestral(alquiler, "cod_mun", "alquiler_mes", "alquiler_estimado", hasta)
+                        .drop(columns="anio"), on=["cod_mun", "trimestre"], how="left")
     return criterios(panel, "cod_mun")

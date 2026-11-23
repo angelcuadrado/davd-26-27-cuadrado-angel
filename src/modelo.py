@@ -29,6 +29,7 @@ from src.indicadores import valor_hace
 VARIABLES = {
     "esfuerzo": "Esfuerzo actual (cuota / renta)",
     "margen_esfuerzo": "Distancia al umbral del 30 % (puntos)",
+    "esfuerzo_alquiler": "Esfuerzo de alquiler (alquiler + gastos / renta)",
     "var_esfuerzo_1a": "Cambio del esfuerzo en un año (puntos)",
     "diferencial": "Precio − IPC a cinco años (puntos)",
     "var_diferencial_1a": "Cambio del diferencial en un año (puntos)",

@@ -54,9 +54,13 @@ delante**. Eso es lo que hace esta aplicación.
   gastos de la vivienda suman entre 4 y 6 puntos de esfuerzo según la comunidad.
 - Entre los municipios de más de 25.000 habitantes, 74 superan el 30 %; encabezan **Santa Eulària des
   Riu (52 %), Calvià, Marbella, Fuengirola y Benidorm**, todos por encima del 43 %.
+- **Alquilar** (alquiler mediano de SERPAVI más los mismos gastos) no supera el 30 % en ningún sitio: el
+  máximo es Málaga entre las provincias (28 %) y Fuengirola entre los municipios (29 %). Ojo: SERPAVI
+  recoge los contratos en vigor declarados en el IRPF, muchos antiguos y más baratos que los anuncios de
+  hoy, así que infravalora el esfuerzo de quien busca piso ahora.
 - La referencia de **persistencia** («dentro de dos años estará como hoy») es muy difícil de batir: el
-  modelo provincial elegido acierta más en sus avisos (precisión 69 % frente a 64 %) pero detecta algo
-  menos (recall 68 % frente a 75 %). Detalle y lectura en la pestaña *Predicción* de la app.
+  modelo provincial elegido acierta algo más en sus avisos (precisión 67 % frente a 64 %) pero detecta
+  algo menos (recall 70 % frente a 75 %). Detalle y lectura en la pestaña *Predicción* de la app.
 
 ## Fuentes de datos
 
@@ -69,12 +73,13 @@ Todas públicas, gratuitas y oficiales. Cada descarga queda registrada en `data/
 | [Atlas de Distribución de Renta de los Hogares](https://www.ine.es/dyngs/INEbase/operacion.htm?c=Estadistica_C&cid=1254736177088) | Renta neta media por hogar y población, por provincia y municipio, 2015–2024 | Misma API (108 tablas) | Anual (≈2 años de desfase) |
 | [Ministerio de Vivienda — boletín estadístico](https://boletinestadistico.transportes.gob.es/2?orden=35000000) | Valor tasado medio de la vivienda libre (€/m²): 52 provincias desde 1995 y 306 municipios de más de 25.000 habitantes desde 2005 | Descarga de Excel | Trimestral |
 | [Encuesta de Presupuestos Familiares (INE)](https://www.ine.es/dyngs/INEbase/operacion.htm?c=Estadistica_C&cid=1254736176806) | Gasto medio por hogar en agua, basuras, electricidad, gas y otros combustibles, gastos de comunidad y seguro del hogar, por comunidad autónoma (tabla 73993), 2016–2025 | Misma API | Anual |
+| [SERPAVI — Ministerio de Vivienda](https://www.mivau.gob.es/vivienda/alquila-bien-es-tu-derecho/serpavi) | Alquiler mensual mediano (€/mes) de los contratos de vivienda habitual declarados en el IRPF, por provincia y municipio, 2011–2024 | Descarga de Excel (71 MB) | Anual |
 | [click_that_hood](https://github.com/codeforgermany/click_that_hood) | Contorno de las provincias con su código INE | GeoJSON | — |
 
 **Cambio respecto a la propuesta.** El precio en euros sale del valor tasado del Ministerio de Vivienda,
 no del IPV del INE: el IPV es un índice (no da euros, que hacen falta para calcular la cuota) y solo se
-publica por comunidad autónoma. SERPAVI no tiene API ni serie homogénea, así que el esfuerzo de
-alquiler queda como ampliación; el alquiler entra en el modelo a través del índice del INE.
+publica por comunidad autónoma. SERPAVI no tiene API, pero publica un Excel con toda la serie: se descarga
+y se lee como las demás fuentes.
 
 ### Limitaciones, declaradas también en la app
 
@@ -83,6 +88,8 @@ alquiler queda como ampliación; el alquiler entra en el modelo a través del í
   discontinua y **el modelo no se entrena con etiquetas calculadas con renta estimada**.
 - Los **gastos y suministros** son el gasto medio por hogar de la comunidad autónoma: la Encuesta de
   Presupuestos Familiares no baja a provincia ni municipio. Empieza en 2016 (2015 toma ese valor).
+- **SERPAVI** mide los alquileres en vigor, no los precios de oferta; llega hasta 2024 (2025–2026 se
+  proyectan como la renta) y en País Vasco y Navarra (régimen foral) solo tiene datos desde 2021–2024.
 - El Ministerio solo publica valor tasado de municipios de **más de 25.000 habitantes**.
 - El índice de alquiler del INE no cubre **País Vasco ni Navarra**; el modelo imputa la mediana.
 
@@ -110,7 +117,7 @@ alquiler queda como ampliación; el alquiler entra en el modelo a través del í
 **Clasificación binaria**: ¿cumplirá el territorio algún criterio dentro de ocho trimestres?
 
 - **Etiqueta**: el estado legal calculado hacia atrás con la misma regla; no es una definición propia.
-- **Variables** (14): esfuerzo y su distancia al umbral, diferencial precio−IPC, sus cambios en un año,
+- **Variables** (15): esfuerzo de compra y su distancia al umbral, esfuerzo de alquiler, diferencial precio−IPC, sus cambios en un año,
   crecimiento del precio y de la renta, tipo de interés y su cambio, nivel de precio, estado actual,
   compraventas por 1.000 habitantes y su variación, y variación del alquiler. Los municipios reciben las
   variables de mercado de su provincia.
@@ -127,20 +134,20 @@ alquiler queda como ampliación; el alquiler entra en el modelo a través del í
 | --- | --- | --- | --- |
 | Referencia: persistencia | 75 % | 64 % | — |
 | Regresión logística | 29 % | 94 % | 0,93 |
-| **Bosque aleatorio (elegido)** | 68 % | **69 %** | 0,93 |
-| Gradient boosting | 68 % | 44 % | 0,91 |
+| **Bosque aleatorio (elegido)** | 70 % | **67 %** | 0,94 |
+| Gradient boosting | 63 % | 58 % | 0,92 |
 
 El modelo se elige por F2 en la validación temporal, no en la prueba; en la prueba no supera el recall
 de la persistencia, y así se cuenta en la app. A nivel municipal el 64 % de los casos de prueba ya están
-tensionados, así que predecir siempre «tensión» acierta mucho; ahí la AUC (≈0,81) es la medida justa. El notebook
+tensionados, así que predecir siempre «tensión» acierta mucho; ahí la AUC (≈0,84) es la medida justa. El notebook
 [`notebooks/exploracion_y_modelo.ipynb`](notebooks/exploracion_y_modelo.ipynb) recoge el análisis.
 
 ## El cuadro de mando
 
 | Pestaña | Qué enseña |
 | --- | --- |
-| **Mapa** | Coropleta de provincias para cuatro indicadores (esfuerzo, diferencial, situación legal y probabilidad a dos años), con selector de trimestre desde 2015 y ranking. Pulsar una provincia abre su ficha. |
-| **Ficha territorial** | Provincia o municipio, comparable con hasta dos provincias más: evolución del esfuerzo (con la renta estimada en discontinua), precio frente a IPC, diferencial, tabla de los últimos trimestres y una **calculadora** para cambiar superficie, financiación, plazo y tipo de interés. |
+| **Mapa** | Coropleta de provincias para cinco indicadores (esfuerzo de compra, esfuerzo de alquiler, diferencial, situación legal y probabilidad a dos años), con selector de trimestre desde 2015 y ranking. Pulsar una provincia abre su ficha. |
+| **Ficha territorial** | Provincia o municipio, comparable con hasta dos provincias más: evolución del esfuerzo (con la renta estimada en discontinua), comprar frente a alquilar, precio frente a IPC, diferencial, tabla de los últimos trimestres y una **calculadora** para cambiar superficie, financiación, plazo y tipo de interés. |
 | **Municipios** | Los 306 municipios en el plano de los dos criterios y una tabla ordenable y filtrable. |
 | **Predicción** | Modelos frente a referencias, matriz de confusión, importancia de variables y territorios que entrarían en tensión. |
 | **Datos y método** | Cálculo, limitaciones, informe de calidad, municipios corregidos en la normalización, fuentes y descarga del panel en CSV. |
@@ -209,8 +216,8 @@ Plan gratuito de Render: si nadie la visita en un rato se duerme, y la primera c
 | 4 | Modelo de clasificación, validación temporal e integración en la app | Hecho |
 | 5 | Despliegue en Render, documentación y preparación de la exposición | Desplegada; exposición en preparación |
 
-**Siguientes pasos**: esfuerzo de alquiler con los precios de referencia del SERPAVI, gastos y
-suministros en el criterio 1 para acercarlo a la ley, y actualización automática trimestral.
+**Siguientes pasos**: precios de oferta de alquiler (no solo contratos en vigor) para medir el esfuerzo
+de quien entra ahora en el mercado, y actualización automática trimestral.
 
 ## Licencia y atribución
 

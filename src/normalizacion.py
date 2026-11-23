@@ -192,6 +192,7 @@ def normalizar(tablas: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.DataFrame]
 
     renta = tablas["renta"]
     poblacion = tablas["poblacion"]
+    serpavi = tablas["alquiler_serpavi"]
     salida = {
         "provincias": provincias,
         "municipios": municipios,
@@ -202,6 +203,8 @@ def normalizar(tablas: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.DataFrame]
         "poblacion_prov": poblacion[poblacion["nivel"] == "provincia"].rename(columns={"codigo": "cod_prov"})[["cod_prov", "anio", "poblacion"]],
         "poblacion_mun": poblacion[poblacion["nivel"] == "municipio"].rename(columns={"codigo": "cod_mun"})[["cod_mun", "anio", "poblacion"]],
         "ipc": tablas["ipc"], "alquiler": tablas["alquiler"], "gastos_vivienda": tablas["gastos_vivienda"],
+        "alquiler_prov": serpavi[serpavi["nivel"] == "provincia"].rename(columns={"codigo": "cod_prov"})[["cod_prov", "anio", "alquiler_mes"]],
+        "alquiler_mun": serpavi[serpavi["nivel"] == "municipio"].rename(columns={"codigo": "cod_mun"})[["cod_mun", "anio", "alquiler_mes"]],
         "compraventas": tablas["compraventas"], "tipo_interes": tablas["tipo_interes"],
     }
 

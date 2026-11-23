@@ -71,3 +71,13 @@ def test_gastos_de_la_vivienda_se_suman_al_esfuerzo():
                            "cod").iloc[-1]
     assert con_gastos["esfuerzo_hipoteca"] == pytest.approx(sin_gastos["esfuerzo"])
     assert con_gastos["esfuerzo"] == pytest.approx(sin_gastos["esfuerzo"] + 3_000 / 30_000)    # +10 puntos
+
+
+def test_criterio_de_esfuerzo_vale_con_hipoteca_o_con_alquiler():
+    n = 21
+    panel = _panel(np.full(n, 1_000.0), np.linspace(100, 110, n), renta=30_000).assign(gastos_vivienda=2_000.0)
+    barato = criterios(panel.assign(alquiler_mes=400.0), "cod").iloc[-1]
+    caro = criterios(panel.assign(alquiler_mes=700.0), "cod").iloc[-1]
+    assert barato["esfuerzo_alquiler"] == pytest.approx((12 * 400 + 2_000) / 30_000)
+    assert barato["esfuerzo"] < 0.30 and not barato["criterio_esfuerzo"]
+    assert caro["esfuerzo_alquiler"] > 0.30 and caro["criterio_esfuerzo"]      # la compra no llega; el alquiler sí

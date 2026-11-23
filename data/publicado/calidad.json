@@ -1,5 +1,5 @@
 {
- "generado": "2026-11-23T12:24:37+00:00",
+ "generado": "2026-11-23T12:48:49+00:00",
  "ultimo_trimestre_precios": "2026Q2",
  "ultimo_anio_renta": 2024,
  "supuestos": {
@@ -122,6 +122,30 @@
    "periodos": 10,
    "cobertura_pct": 100.0
   },
+  "alquiler_prov": {
+   "filas": 681,
+   "validas": 681,
+   "rechazadas": 0,
+   "rechazadas_por_regla": {},
+   "desde": "2011",
+   "hasta": "2024",
+   "territorios": 52,
+   "periodos": 14,
+   "cobertura_pct": 93.5
+  },
+  "alquiler_mun": {
+   "filas": 36861,
+   "validas": 36856,
+   "rechazadas": 5,
+   "rechazadas_por_regla": {
+    "alquiler entre 100 y 5.000 €/mes": 5
+   },
+   "desde": "2011",
+   "hasta": "2024",
+   "territorios": 3484,
+   "periodos": 14,
+   "cobertura_pct": 75.6
+  },
   "compraventas": {
    "filas": 4108,
    "validas": 4108,
@@ -218,9 +242,9 @@
   "municipios_sin_pareja": []
  },
  "fuentes": {
-  "descargas": 133,
+  "descargas": 134,
   "primera": "2026-11-16T14:29:10+00:00",
-  "ultima": "2026-11-23T12:21:13+00:00",
-  "megabytes": 224.3
+  "ultima": "2026-11-23T12:47:59+00:00",
+  "megabytes": 295.4
  }
 }

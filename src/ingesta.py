@@ -247,6 +247,30 @@ def precios_municipios(refrescar: bool = False) -> pd.DataFrame:
     return pd.DataFrame(filas)
 
 
+def alquiler_serpavi(refrescar: bool = False) -> pd.DataFrame:
+    """Alquiler mensual mediano (€/mes) por provincia y municipio, 2011-2024 (SERPAVI).
+
+    El Excel trae una fila por territorio y una columna por variable y año («ALQTBID12_M_VC_24»
+    es la mediana de la vivienda colectiva en 2024). Se usa la vivienda colectiva, que es la
+    mayoría del alquiler, y la unifamiliar solo donde no hay dato de colectiva.
+    """
+    fichero = descargar_fichero(config.SERPAVI, "serpavi/bd_serpavi.xlsx", refrescar)
+    partes = []
+    for hoja, nivel, columna_codigo in (("Provincias", "provincia", "CPRO"), ("Municipios", "municipio", "CUMUN")):
+        ancho = pd.read_excel(fichero, sheet_name=hoja, dtype={columna_codigo: str},
+                              usecols=lambda c: c == columna_codigo or str(c).startswith(("ALQTBID12_M_", "BI_ALVHEPCO_")))
+        largo = ancho.melt(id_vars=columna_codigo, var_name="variable", value_name="valor")
+        largo["anio"] = 2000 + largo["variable"].str[-2:].astype(int)
+        largo["serie"] = largo["variable"].str[:-3]
+        tabla = largo.pivot_table(index=[columna_codigo, "anio"], columns="serie", values="valor").reset_index()
+        partes.append(pd.DataFrame({
+            "nivel": nivel, "codigo": tabla[columna_codigo], "anio": tabla["anio"],
+            "alquiler_mes": tabla["ALQTBID12_M_VC"].fillna(tabla["ALQTBID12_M_VU"]),
+            "viviendas_alquiler": tabla[["BI_ALVHEPCO_TVC", "BI_ALVHEPCO_TVU"]].sum(axis=1, min_count=1),
+        }))
+    return pd.concat(partes, ignore_index=True).dropna(subset=["alquiler_mes"])
+
+
 def geojson_provincias(refrescar: bool = False):
     return descargar_fichero(config.GEOJSON_PROVINCIAS, "geo/provincias.geojson", refrescar)
 
@@ -257,7 +281,7 @@ def ingerir_todo(refrescar: bool = False) -> dict[str, pd.DataFrame]:
     fuentes = {
         "renta": renta_atlas, "poblacion": poblacion_atlas, "ipc": ipc_provincial,
         "alquiler": ipva_provincial, "compraventas": compraventas_provincial,
-        "tipo_interes": tipo_interes, "gastos_vivienda": gastos_vivienda,
+        "tipo_interes": tipo_interes, "gastos_vivienda": gastos_vivienda, "alquiler_serpavi": alquiler_serpavi,
         "precios_provincias": precios_provincias,
         "precios_municipios": precios_municipios,
     }

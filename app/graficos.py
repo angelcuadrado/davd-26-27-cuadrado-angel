@@ -18,6 +18,9 @@ INDICADORES = {
     "esfuerzo": {"titulo": "Esfuerzo de compra", "formato": ".1%", "umbral": 0.30,
                  "explicacion": "Cuota anual de la hipoteca de una vivienda de 90 m² más los gastos y suministros de la "
                                 "vivienda (agua, luz, gas, comunidad y seguro), entre la renta neta media del hogar."},
+    "esfuerzo_alquiler": {"titulo": "Esfuerzo de alquiler", "formato": ".1%", "umbral": 0.30,
+                          "explicacion": "Alquiler mensual mediano (SERPAVI) por doce, más los gastos y suministros de "
+                                         "la vivienda, entre la renta neta media del hogar."},
     "diferencial": {"titulo": "Precio − IPC a cinco años", "formato": "+.1f", "umbral": 3.0, "sufijo": " p.",
                     "explicacion": "Crecimiento acumulado del precio en cinco años menos el del IPC de la provincia, en puntos."},
     "estado": {"titulo": "Situación legal hoy", "explicacion": "Tensionado si cumple al menos uno de los dos criterios del art. 18.3."},
@@ -145,6 +148,23 @@ def serie_precio_ipc(df: pd.DataFrame, nombre: str) -> go.Figure:
     fig.update_yaxes(ticksuffix=" %", zeroline=True, zerolinecolor="#c9c7c0")
     fig.update_layout(hovermode="x unified")
     return _base(fig, 340)
+
+
+def serie_compra_alquiler(df: pd.DataFrame) -> go.Figure:
+    """Esfuerzo de comprar frente a esfuerzo de alquilar en el mismo territorio (mismo eje, en %)."""
+    d = df.dropna(subset=["esfuerzo"])
+    x = d["trimestre"].dt.to_timestamp()
+    fig = go.Figure([
+        go.Scatter(x=x, y=d["esfuerzo"], name="Comprar (hipoteca + gastos)", mode="lines",
+                   line=dict(color=AZUL, width=2.5), hovertemplate="%{y:.1%}<extra>Comprar</extra>"),
+        go.Scatter(x=x, y=d["esfuerzo_alquiler"], name="Alquilar (alquiler + gastos)", mode="lines",
+                   line=dict(color=NARANJA, width=2.5), hovertemplate="%{y:.1%}<extra>Alquilar</extra>"),
+    ])
+    fig.add_hline(y=0.30, line=dict(color=TINTA, width=1.5, dash="dot"), annotation_text="Umbral legal 30 %",
+                  annotation_position="top left", annotation_font_color=TINTA_SUAVE)
+    fig.update_yaxes(tickformat=".0%", rangemode="tozero")
+    fig.update_layout(hovermode="x unified")
+    return _base(fig, 320)
 
 
 def serie_diferencial(df: pd.DataFrame) -> go.Figure:

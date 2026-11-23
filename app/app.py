@@ -126,7 +126,11 @@ def pestana_territorio():
                 grafico("calc-resultado"),
                 html.P(id="calc-texto", className="explicacion"),
             ], className="columna-mitad tarjeta-grafico"),
-            html.Div([html.H3("Diferencial de precios"), grafico("serie-diferencial"),
+            html.Div([html.H3("¿Comprar o alquilar?"),
+                      html.P("El criterio 1 se cumple si cualquiera de las dos cargas supera el 30 %. El alquiler "
+                             "(SERPAVI) es el de los contratos en vigor, no el de los anuncios.", className="nota"),
+                      grafico("serie-compra-alquiler"),
+                      html.H3("Diferencial de precios"), grafico("serie-diferencial"),
                       html.H3("Últimos trimestres"), html.Div(id="tabla-territorio")],
                      className="columna-mitad tarjeta-grafico"),
         ], className="fila-graficos"),
@@ -203,8 +207,9 @@ def pestana_metodo():
 tasado medio del trimestre, financiada al **{config.FINANCIACION:.0%}** a **{config.PLAZO_ANIOS} años** al tipo medio
 de las hipotecas sobre vivienda, **más los gastos y suministros básicos** (agua, basuras, electricidad, gas y otros
 combustibles, gastos de comunidad y seguro del hogar: gasto medio por hogar de la comunidad autónoma según la
-Encuesta de Presupuestos Familiares), todo dividido entre la **renta neta media por hogar**. Se cumple si supera
-el **30 %**.
+Encuesta de Presupuestos Familiares), todo dividido entre la **renta neta media por hogar**. La ley dice «hipoteca
+**o** alquiler», así que se calcula también la carga de alquilar (alquiler mensual mediano de SERPAVI por doce, más
+los mismos gastos) y el criterio se cumple si **cualquiera de las dos** supera el **30 %**.
 
 **Criterio 2 · Precios.** Crecimiento acumulado del valor tasado en los cinco años anteriores menos el crecimiento
 del IPC de la provincia en el mismo periodo. Se cumple si la diferencia supera **3 puntos**.
@@ -226,8 +231,10 @@ métrica principal el recall de la clase tensionada.
 - **Los gastos son una media de la comunidad autónoma.** La Encuesta de Presupuestos Familiares no baja a provincia
   ni a municipio, y empieza en 2016: 2015 toma el valor de 2016 y 2026 el de 2025.
 - **Valor tasado, no precio de cierre.** Es la serie oficial más larga y homogénea por provincia y municipio.
-- **Solo compra.** El alquiler entra como variable del modelo (índice del INE), pero el INE no publica niveles en
-  euros y el SERPAVI no tiene API; el esfuerzo de alquiler queda como ampliación.
+- **El alquiler de SERPAVI es el de los contratos en vigor**, declarados en el IRPF, no el precio que encuentra hoy
+  quien busca piso: muchos contratos son antiguos y más baratos, así que el esfuerzo de alquilar sale por debajo del
+  real para quien entra ahora en el mercado. Llega hasta 2024 (2025-2026 se proyectan, como la renta) y en País Vasco
+  y Navarra (régimen foral) solo hay datos desde 2021-2024.
 - **Municipios de más de 25.000 habitantes**: el Ministerio no publica valor tasado de los demás.
 - El índice de alquiler del INE no cubre **País Vasco ni Navarra** (régimen foral); el modelo imputa ese hueco.
 """, link_target="_blank"),
@@ -251,7 +258,9 @@ métrica principal el recall de la clase tensionada.
             html.H3("Fuentes"),
             dcc.Markdown("""
 - **INE, API JSON** — Atlas de distribución de renta de los hogares; IPC provincial; índice de precios de vivienda
-  en alquiler; estadística de transmisiones de derechos de la propiedad; estadística de hipotecas.
+  en alquiler; estadística de transmisiones de derechos de la propiedad; estadística de hipotecas; Encuesta de
+  Presupuestos Familiares (gastos y suministros de la vivienda).
+- **SERPAVI**, Ministerio de Vivienda — alquiler mensual mediano por provincia y municipio (2011-2024).
 - **Ministerio de Vivienda y Agenda Urbana** — valor tasado medio de la vivienda libre por provincias y por municipios
   de más de 25.000 habitantes (boletín estadístico).
 - **Mapa de provincias** — Code for Germany, *click_that_hood* (datos abiertos).
@@ -310,7 +319,8 @@ def _datos_mapa(indicador: str, trimestre: pd.Period) -> pd.DataFrame:
         d["hover"] = ("Probabilidad en dos años: " + d["probabilidad"].map(pct) + "<br>Previsión: " + d["escenario"])
         return d
     d = PROV[PROV["trimestre"] == trimestre].copy()
-    d["hover"] = ("Esfuerzo: " + d["esfuerzo"].map(pct) + "<br>Precio − IPC (5 años): " + d["diferencial"].map(puntos)
+    d["hover"] = ("Esfuerzo de compra: " + d["esfuerzo"].map(pct) + "<br>Esfuerzo de alquiler: "
+                  + d["esfuerzo_alquiler"].map(pct) + "<br>Precio − IPC (5 años): " + d["diferencial"].map(puntos)
                   + "<br>" + d["estado"].fillna("Sin dato") + "<br>Valor tasado: " + d["precio_m2"].map(euros) + "/m²")
     return d
 
@@ -329,7 +339,7 @@ def actualizar_mapa(indicador, posicion, provincia):
     pred = D["pred_provincias"]
     tarjetas = [
         tarjeta("Provincias tensionadas", f"{int(actual['tensionado'].sum())} de {n}", etiqueta(trimestre), "destacada"),
-        tarjeta("Por esfuerzo (> 30 %)", str(int(actual["criterio_esfuerzo"].sum())), "criterio 1"),
+        tarjeta("Por esfuerzo (> 30 %)", str(int(actual["criterio_esfuerzo"].sum())), "criterio 1: comprar o alquilar"),
         tarjeta("Por precios (> IPC + 3)", str(int(actual["criterio_precio"].sum())), "criterio 2"),
         tarjeta("Esfuerzo mediano", pct(actual["esfuerzo"].median()), "de las 52 provincias"),
         tarjeta("Tensionadas en dos años", f"{int(pred['prediccion'].sum())} de {len(pred)}",
@@ -367,6 +377,7 @@ def _territorio(provincia, municipio):
 
 @app.callback(Output("tarjetas-territorio", "children"), Output("serie-esfuerzo", "figure"),
               Output("serie-precio", "figure"), Output("serie-diferencial", "figure"),
+              Output("serie-compra-alquiler", "figure"),
               Output("tabla-territorio", "children"),
               Input("provincia", "value"), Input("municipio", "value"), Input("comparar", "value"))
 def actualizar_territorio(provincia, municipio, comparar):
@@ -379,6 +390,8 @@ def actualizar_territorio(provincia, municipio, comparar):
                 f"hipoteca {pct(hoy['esfuerzo_hipoteca'])} + gastos {pct(hoy['esfuerzo'] - hoy['esfuerzo_hipoteca'])}"
                 + (" · renta estimada" if hoy["renta_estimada"] else "")),
         tarjeta("Precio − IPC (5 años)", puntos(hoy["diferencial"]), "umbral: +3 puntos"),
+        tarjeta("Esfuerzo de alquiler", pct(hoy["esfuerzo_alquiler"]),
+                f"alquiler mediano {euros(hoy['alquiler_mes'])}/mes" + (" (est.)" if hoy["alquiler_estimado"] == True else "")),
         tarjeta("Valor tasado", f"{euros(hoy['precio_m2'])}/m²", f"renta del hogar: {euros(hoy['renta_hogar'])}"),
         tarjeta("Probabilidad en dos años", pct(p["probabilidad"], 0) if p is not None else "—",
                 p["escenario"] if p is not None else ""),
@@ -394,10 +407,12 @@ def actualizar_territorio(provincia, municipio, comparar):
     tabla = serie.dropna(subset=["esfuerzo"]).tail(8).iloc[::-1]
     filas = [{"Trimestre": etiqueta(r.trimestre), "€/m²": euros(r.precio_m2), "Renta hogar": euros(r.renta_hogar)
               + (" (est.)" if r.renta_estimada else ""), "Tipo": f"{r.tipo_interes:.2f} %".replace(".", ","),
-              "Gastos/año": euros(r.gastos_vivienda), "Esfuerzo": pct(r.esfuerzo),
+              "Gastos/año": euros(r.gastos_vivienda), "Alquiler/mes": euros(r.alquiler_mes),
+              "Esfuerzo compra": pct(r.esfuerzo), "Esfuerzo alquiler": pct(r.esfuerzo_alquiler),
               "Precio − IPC": puntos(r.diferencial), "Estado": r.estado or "—"}
              for r in tabla.itertuples()]
     return (tarjetas, g.serie_esfuerzo(series), g.serie_precio_ipc(desde, nombre), g.serie_diferencial(desde),
+            g.serie_compra_alquiler(serie[serie["trimestre"] >= PRIMERO]),
             dash_table.DataTable(filas, [{"name": c, "id": c} for c in filas[0]], **{**ESTILO_TABLA, "page_size": 8}))
 
 
@@ -435,7 +450,9 @@ def actualizar_municipios(provincias, escenarios, destacado):
     if d.empty:
         return g.vacia("No hay municipios con esos filtros"), None
     filas = [{"Municipio": r.municipio, "Provincia": r.provincia, "€/m²": round(r.precio_m2),
-              "Renta hogar (€)": round(r.renta_hogar), "Esfuerzo (%)": round(100 * r.esfuerzo, 1),
+              "Renta hogar (€)": round(r.renta_hogar), "Alquiler (€/mes)": None if pd.isna(r.alquiler_mes) else round(r.alquiler_mes),
+              "Esfuerzo compra (%)": round(100 * r.esfuerzo, 1),
+              "Esfuerzo alquiler (%)": None if pd.isna(r.esfuerzo_alquiler) else round(100 * r.esfuerzo_alquiler, 1),
               "Precio − IPC (p.)": round(r.diferencial, 1), "Estado": r.estado,
               "Prob. 2 años (%)": None if pd.isna(r.probabilidad) else round(100 * r.probabilidad),
               "Previsión": r.escenario}
