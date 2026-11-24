@@ -7,7 +7,8 @@ Para cada territorio y trimestre:
   de la vivienda (gasto medio por hogar de la comunidad autónoma), dividido entre la renta neta
   media por hogar. Criterio 1: esfuerzo > 30 %. Se guarda también la parte de la hipoteca sola.
 - **Diferencial de precios**: crecimiento acumulado del precio en los cinco años anteriores
-  menos el del IPC de la provincia, en puntos. Criterio 2: diferencial > 3 puntos.
+  menos el del IPC de la provincia, en puntos. Se calcula para la compra (valor tasado) y para el
+  alquiler (SERPAVI). Criterio 2: cualquiera de los dos diferenciales > 3 puntos.
 
 Un territorio está *tensionado* si cumple al menos uno de los dos.
 """
@@ -112,10 +113,17 @@ def criterios(panel: pd.DataFrame, clave: str) -> pd.DataFrame:
     panel["crec_precio_5a"] = 100 * (panel["precio_m2"] / valor_hace(panel, clave, "precio_m2", v) - 1)
     panel["crec_ipc_5a"] = 100 * (panel["ipc"] / valor_hace(panel, clave, "ipc", v) - 1)
     panel["diferencial"] = panel["crec_precio_5a"] - panel["crec_ipc_5a"]
+    if "alquiler_mes" in panel:
+        panel["crec_alquiler_5a"] = 100 * (panel["alquiler_mes"] / valor_hace(panel, clave, "alquiler_mes", v) - 1)
+    else:
+        panel["crec_alquiler_5a"] = np.nan
+    panel["diferencial_alquiler"] = panel["crec_alquiler_5a"] - panel["crec_ipc_5a"]
     # La ley dice «hipoteca o alquiler»: basta con que una de las dos cargas supere el umbral
     mayor = panel[["esfuerzo", "esfuerzo_alquiler"]].max(axis=1)
     panel["criterio_esfuerzo"] = (mayor > config.UMBRAL_ESFUERZO).where(panel["esfuerzo"].notna())
-    panel["criterio_precio"] = (panel["diferencial"] > config.UMBRAL_DIFERENCIAL).where(panel["diferencial"].notna())
+    # También aquí la ley dice «precio de compra o alquiler»: vale cualquiera de los dos
+    mayor_diferencial = panel[["diferencial", "diferencial_alquiler"]].max(axis=1)
+    panel["criterio_precio"] = (mayor_diferencial > config.UMBRAL_DIFERENCIAL).where(panel["diferencial"].notna())
     ambos_conocidos = panel["criterio_esfuerzo"].notna() & panel["criterio_precio"].notna()
     panel["tensionado"] = (panel["criterio_esfuerzo"].fillna(False).astype(bool)
                            | panel["criterio_precio"].fillna(False).astype(bool)).where(ambos_conocidos)

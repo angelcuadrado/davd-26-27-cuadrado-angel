@@ -90,8 +90,8 @@ El **artículo 18.3** fija dos criterios objetivos. Basta con cumplir **uno**:
 
 1. **Esfuerzo:** pagar la hipoteca **o** el alquiler, más los gastos y suministros básicos, supera el **30 % de la
    renta** media de los hogares.
-2. **Precios:** en los **cinco años** anteriores, el precio de la vivienda ha subido al menos **3 puntos más que
-   el IPC**.
+2. **Precios:** en los **cinco años** anteriores, el precio de compra **o** el alquiler ha subido al menos
+   **3 puntos más que el IPC**.
 
 Esta app calcula los dos criterios para las **52 provincias** y los **{MUN['cod_mun'].nunique()} municipios** de más
 de 25.000 habitantes, trimestre a trimestre desde 2015, y estima cuáles estarán tensionados dentro de dos años.
@@ -115,7 +115,9 @@ de 25.000 habitantes, trimestre a trimestre desde 2015, y estima cuáles estará
 
 - En cinco años el valor tasado ha subido un **{f"{m['crec_precio_5a']:.1f}".replace(".", ",")} %** y el IPC un
   **{f"{m['crec_ipc_5a']:.1f}".replace(".", ",")} %**.
-- Diferencial = **{puntos(m['diferencial'])}** → {"**supera** los 3 puntos" if m['diferencial'] > 3 else "no llega a 3 puntos"}.
+- Diferencial de la compra = **{puntos(m['diferencial'])}** → {"**supera** los 3 puntos" if m['diferencial'] > 3 else "no llega a 3 puntos"}.
+- El alquiler ha subido un **{f"{m['crec_alquiler_5a']:.1f}".replace(".", ",")} %**: diferencial de
+  **{puntos(m['diferencial_alquiler'])}**.
 
 **Resultado:** {"cumple al menos un criterio: es **zona tensionada**." if m['tensionado'] else "no cumple ninguno."}
 """),
@@ -232,8 +234,9 @@ def pestana_territorio():
             html.Div([html.H3("Esfuerzo de compra"),
                       html.P("Línea discontinua: años con la renta todavía sin publicar (estimada).", className="nota"),
                       grafico("serie-esfuerzo")], className="columna-mitad tarjeta-grafico"),
-            html.Div([html.H3("Precio frente a IPC: crecimiento acumulado a cinco años"),
-                      html.P("Criterio 2: el precio debe crecer más de 3 puntos por encima del IPC.", className="nota"),
+            html.Div([html.H3("Compra, alquiler e IPC: crecimiento acumulado a cinco años"),
+                      html.P("Criterio 2: la compra o el alquiler deben crecer más de 3 puntos por encima del IPC.",
+                             className="nota"),
                       grafico("serie-precio")], className="columna-mitad tarjeta-grafico"),
         ], className="fila-graficos"),
         html.Div([
@@ -338,8 +341,9 @@ Encuesta de Presupuestos Familiares), todo dividido entre la **renta neta media 
 **o** alquiler», así que se calcula también la carga de alquilar (alquiler mensual mediano de SERPAVI por doce, más
 los mismos gastos) y el criterio se cumple si **cualquiera de las dos** supera el **30 %**.
 
-**Criterio 2 · Precios.** Crecimiento acumulado del valor tasado en los cinco años anteriores menos el crecimiento
-del IPC de la provincia en el mismo periodo. Se cumple si la diferencia supera **3 puntos**.
+**Criterio 2 · Precios.** Crecimiento acumulado en los cinco años anteriores menos el crecimiento del IPC de la
+provincia en el mismo periodo. Se calcula para la compra (valor tasado) y para el alquiler (SERPAVI), porque la ley
+dice «precio de compra **o** alquiler»: se cumple si **cualquiera de los dos** supera los **3 puntos**.
 
 Un territorio está **tensionado** si cumple al menos uno de los dos, como dice el
 [artículo 18.3 de la Ley 12/2023](https://www.boe.es/eli/es/l/2023/05/24/12).
@@ -491,6 +495,7 @@ def _datos_mapa(indicador: str, trimestre: pd.Period) -> pd.DataFrame:
     d = PROV[PROV["trimestre"] == trimestre].copy()
     d["hover"] = ("Esfuerzo de compra: " + d["esfuerzo"].map(pct) + "<br>Esfuerzo de alquiler: "
                   + d["esfuerzo_alquiler"].map(pct) + "<br>Precio − IPC (5 años): " + d["diferencial"].map(puntos)
+                  + "<br>Alquiler − IPC (5 años): " + d["diferencial_alquiler"].map(puntos)
                   + "<br>" + d["estado"].fillna("Sin dato") + "<br>Valor tasado: " + d["precio_m2"].map(euros) + "/m²")
     return d
 
@@ -512,7 +517,7 @@ def actualizar_mapa(indicador, posicion, provincia):
     tarjetas = [
         tarjeta("Provincias tensionadas", f"{int(actual['tensionado'].sum())} de {n}", etiqueta(trimestre), "destacada"),
         tarjeta("Por esfuerzo (> 30 %)", str(int(actual["criterio_esfuerzo"].sum())), "criterio 1: comprar o alquilar"),
-        tarjeta("Por precios (> IPC + 3)", str(int(actual["criterio_precio"].sum())), "criterio 2"),
+        tarjeta("Por precios (> IPC + 3)", str(int(actual["criterio_precio"].sum())), "criterio 2: compra o alquiler"),
         tarjeta("Esfuerzo mediano", pct(actual["esfuerzo"].median()), "de las 52 provincias"),
         tarjeta("Tensionadas en dos años", f"{int(pred['prediccion'].sum())} de {len(pred)}",
                 f"previsión para {etiqueta(ULTIMO + config.HORIZONTE_TRIMESTRES)}"),
@@ -563,7 +568,8 @@ def actualizar_territorio(provincia, municipio, comparar):
         tarjeta("Esfuerzo de compra", pct(hoy["esfuerzo"]),
                 f"hipoteca {pct(hoy['esfuerzo_hipoteca'])} + gastos {pct(hoy['esfuerzo'] - hoy['esfuerzo_hipoteca'])}"
                 + (" · renta estimada" if hoy["renta_estimada"] else "")),
-        tarjeta("Precio − IPC (5 años)", puntos(hoy["diferencial"]), "umbral: +3 puntos"),
+        tarjeta("Precio − IPC (5 años)", puntos(hoy["diferencial"]),
+                f"alquiler − IPC: {puntos(hoy['diferencial_alquiler'])} · umbral: +3"),
         tarjeta("Esfuerzo de alquiler", pct(hoy["esfuerzo_alquiler"]),
                 f"alquiler mediano {euros(hoy['alquiler_mes'])}/mes" + (" (est.)" if hoy["alquiler_estimado"] == True else "")),
         tarjeta("Valor tasado", f"{euros(hoy['precio_m2'])}/m²", f"renta del hogar: {euros(hoy['renta_hogar'])}"),

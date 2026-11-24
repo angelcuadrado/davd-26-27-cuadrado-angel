@@ -138,12 +138,14 @@ def serie_esfuerzo(series: dict[str, pd.DataFrame]) -> go.Figure:
 
 
 def serie_precio_ipc(df: pd.DataFrame, nombre: str) -> go.Figure:
-    """Crecimiento acumulado a cinco años del precio y del IPC (mismo eje, en %)."""
+    """Crecimiento acumulado a cinco años de la compra, el alquiler y el IPC (mismo eje, en %)."""
     d = df.dropna(subset=["crec_precio_5a"])
     x = d["trimestre"].dt.to_timestamp()
     fig = go.Figure([
-        go.Scatter(x=x, y=d["crec_precio_5a"], name="Precio de la vivienda", mode="lines",
-                   line=dict(color=BERMELLON, width=2.5), hovertemplate="%{y:+.1f} %<extra>Precio</extra>"),
+        go.Scatter(x=x, y=d["crec_precio_5a"], name="Precio de compra", mode="lines",
+                   line=dict(color=BERMELLON, width=2.5), hovertemplate="%{y:+.1f} %<extra>Compra</extra>"),
+        go.Scatter(x=x, y=d["crec_alquiler_5a"], name="Alquiler (SERPAVI)", mode="lines",
+                   line=dict(color=NARANJA, width=2.5), hovertemplate="%{y:+.1f} %<extra>Alquiler</extra>"),
         go.Scatter(x=x, y=d["crec_ipc_5a"], name="IPC de la provincia", mode="lines",
                    line=dict(color=AZUL, width=2.5), hovertemplate="%{y:+.1f} %<extra>IPC</extra>"),
     ])

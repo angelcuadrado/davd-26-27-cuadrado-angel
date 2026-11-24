@@ -28,7 +28,7 @@ log = logging.getLogger("pipeline")
 
 COLUMNAS_PANEL = ["trimestre", "precio_m2", "renta_hogar", "renta_estimada", "tipo_interes", "ipc",
                   "gastos_vivienda", "esfuerzo_hipoteca", "esfuerzo", "alquiler_mes", "alquiler_estimado",
-                  "esfuerzo_alquiler", "crec_precio_5a", "crec_ipc_5a", "diferencial",
+                  "esfuerzo_alquiler", "crec_alquiler_5a", "diferencial_alquiler", "crec_precio_5a", "crec_ipc_5a", "diferencial",
                   "criterio_esfuerzo", "criterio_precio", "tensionado"]
 CANARIAS = {"35", "38"}
 DESPLAZAMIENTO_CANARIAS = (6.5, 7.0)        # grados de longitud y latitud

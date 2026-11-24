@@ -33,6 +33,7 @@ VARIABLES = {
     "var_esfuerzo_1a": "Cambio del esfuerzo en un año (puntos)",
     "diferencial": "Precio − IPC a cinco años (puntos)",
     "var_diferencial_1a": "Cambio del diferencial en un año (puntos)",
+    "diferencial_alquiler": "Alquiler − IPC a cinco años (puntos)",
     "crec_precio_1a": "Crecimiento del precio en un año (%)",
     "crec_renta_1a": "Crecimiento de la renta en un año (%)",
     "tipo_interes": "Tipo de interés hipotecario (%)",

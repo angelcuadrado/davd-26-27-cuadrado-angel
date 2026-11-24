@@ -1,6 +1,6 @@
 {
  "provincias": {
-  "elegido": "Bosque aleatorio",
+  "elegido": "Gradient boosting",
   "resumen": {
    "nivel": "cod_prov",
    "umbral": 0.55,
@@ -11,6 +11,7 @@
     "var_esfuerzo_1a",
     "diferencial",
     "var_diferencial_1a",
+    "diferencial_alquiler",
     "crec_precio_1a",
     "crec_renta_1a",
     "tipo_interes",
@@ -27,261 +28,272 @@
    "filas_prueba": 416,
    "periodo_entrenamiento": "2015Q1 – 2020Q4",
    "periodo_prueba": "2021Q1 – 2022Q4",
-   "positivos_entrenamiento_pct": 19.1,
-   "positivos_prueba_pct": 13.5
+   "positivos_entrenamiento_pct": 63.6,
+   "positivos_prueba_pct": 45.4
   },
   "metricas": {
    "Referencia: clase mayoritaria": {
-    "recall": 0.0,
-    "precision": 0.0,
-    "f1": 0.0,
-    "f2": 0.0,
+    "recall": 1.0,
+    "precision": 0.454,
+    "f1": 0.625,
+    "f2": 0.806,
     "exactitud_equilibrada": 0.5,
     "matriz": {
-     "vn": 360,
-     "fp": 0,
-     "fn": 56,
-     "vp": 0
+     "vn": 0,
+     "fp": 227,
+     "fn": 0,
+     "vp": 189
     }
    },
    "Referencia: persistencia": {
-    "recall": 0.75,
-    "precision": 0.636,
-    "f1": 0.689,
-    "f2": 0.724,
-    "exactitud_equilibrada": 0.842,
+    "recall": 0.974,
+    "precision": 0.632,
+    "f1": 0.767,
+    "f2": 0.879,
+    "exactitud_equilibrada": 0.751,
     "matriz": {
-     "vn": 336,
-     "fp": 24,
-     "fn": 14,
-     "vp": 42
+     "vn": 120,
+     "fp": 107,
+     "fn": 5,
+     "vp": 184
     },
-    "f2_validacion_temporal": 0.791
+    "f2_validacion_temporal": 0.713
    },
    "Regresión logística": {
-    "recall": 0.286,
-    "precision": 0.941,
-    "f1": 0.438,
-    "f2": 0.332,
-    "exactitud_equilibrada": 0.641,
+    "recall": 0.921,
+    "precision": 0.516,
+    "f1": 0.662,
+    "f2": 0.796,
+    "exactitud_equilibrada": 0.601,
     "matriz": {
-     "vn": 359,
-     "fp": 1,
-     "fn": 40,
-     "vp": 16
+     "vn": 64,
+     "fp": 163,
+     "fn": 15,
+     "vp": 174
     },
-    "roc_auc": 0.932,
-    "umbral": 0.85,
-    "f2_validacion_temporal": 0.702
+    "roc_auc": 0.732,
+    "umbral": 0.75,
+    "f2_validacion_temporal": 0.956
    },
    "Bosque aleatorio": {
-    "recall": 0.696,
-    "precision": 0.672,
-    "f1": 0.684,
-    "f2": 0.691,
-    "exactitud_equilibrada": 0.822,
+    "recall": 0.878,
+    "precision": 0.505,
+    "f1": 0.641,
+    "f2": 0.765,
+    "exactitud_equilibrada": 0.58,
     "matriz": {
-     "vn": 341,
-     "fp": 19,
-     "fn": 17,
-     "vp": 39
+     "vn": 64,
+     "fp": 163,
+     "fn": 23,
+     "vp": 166
     },
-    "roc_auc": 0.938,
-    "umbral": 0.55,
-    "f2_validacion_temporal": 0.815
+    "roc_auc": 0.752,
+    "umbral": 0.65,
+    "f2_validacion_temporal": 0.958
    },
    "Gradient boosting": {
-    "recall": 0.625,
-    "precision": 0.583,
-    "f1": 0.603,
-    "f2": 0.616,
-    "exactitud_equilibrada": 0.778,
+    "recall": 0.889,
+    "precision": 0.491,
+    "f1": 0.633,
+    "f2": 0.765,
+    "exactitud_equilibrada": 0.561,
     "matriz": {
-     "vn": 335,
-     "fp": 25,
+     "vn": 53,
+     "fp": 174,
      "fn": 21,
-     "vp": 35
+     "vp": 168
     },
-    "roc_auc": 0.924,
-    "umbral": 0.7,
-    "f2_validacion_temporal": 0.772
+    "roc_auc": 0.727,
+    "umbral": 0.55,
+    "f2_validacion_temporal": 0.959
    }
   },
   "importancias": [
    {
-    "variable": "log_precio",
-    "descripcion": "Nivel de precio (log €/m²)",
-    "importancia": 0.0464,
-    "desviacion": 0.0111
-   },
-   {
-    "variable": "tensionado_hoy",
-    "descripcion": "Tensionado hoy (0/1)",
-    "importancia": 0.0221,
-    "desviacion": 0.0045
-   },
-   {
-    "variable": "diferencial",
-    "descripcion": "Precio − IPC a cinco años (puntos)",
-    "importancia": 0.0187,
-    "desviacion": 0.0037
-   },
-   {
-    "variable": "margen_esfuerzo",
-    "descripcion": "Distancia al umbral del 30 % (puntos)",
-    "importancia": 0.011,
-    "desviacion": 0.0035
-   },
-   {
-    "variable": "crec_renta_1a",
-    "descripcion": "Crecimiento de la renta en un año (%)",
-    "importancia": 0.0096,
-    "desviacion": 0.0022
-   },
-   {
-    "variable": "esfuerzo",
-    "descripcion": "Esfuerzo actual (cuota / renta)",
-    "importancia": 0.0084,
-    "desviacion": 0.0033
-   },
-   {
-    "variable": "var_alquiler",
-    "descripcion": "Crecimiento del alquiler en el año (%)",
-    "importancia": 0.0058,
-    "desviacion": 0.0039
-   },
-   {
-    "variable": "esfuerzo_alquiler",
-    "descripcion": "Esfuerzo de alquiler (alquiler + gastos / renta)",
-    "importancia": 0.0012,
-    "desviacion": 0.002
-   },
-   {
-    "variable": "tipo_interes",
-    "descripcion": "Tipo de interés hipotecario (%)",
-    "importancia": 0.001,
-    "desviacion": 0.0004
-   },
-   {
-    "variable": "var_diferencial_1a",
-    "descripcion": "Cambio del diferencial en un año (puntos)",
-    "importancia": 0.0002,
-    "desviacion": 0.0003
-   },
-   {
-    "variable": "var_esfuerzo_1a",
-    "descripcion": "Cambio del esfuerzo en un año (puntos)",
-    "importancia": -0.0009,
-    "desviacion": 0.0007
+    "variable": "diferencial_alquiler",
+    "descripcion": "Alquiler − IPC a cinco años (puntos)",
+    "importancia": 0.0873,
+    "desviacion": 0.0079
    },
    {
     "variable": "compraventas_1000",
     "descripcion": "Compraventas por 1.000 habitantes (último año)",
-    "importancia": -0.0011,
-    "desviacion": 0.0027
-   },
-   {
-    "variable": "crec_precio_1a",
-    "descripcion": "Crecimiento del precio en un año (%)",
-    "importancia": -0.0034,
-    "desviacion": 0.0048
+    "importancia": 0.0221,
+    "desviacion": 0.0074
    },
    {
     "variable": "var_tipo_1a",
     "descripcion": "Cambio del tipo en un año (puntos)",
-    "importancia": -0.0035,
-    "desviacion": 0.0012
+    "importancia": 0.0183,
+    "desviacion": 0.0026
+   },
+   {
+    "variable": "var_alquiler",
+    "descripcion": "Crecimiento del alquiler en el año (%)",
+    "importancia": 0.0159,
+    "desviacion": 0.0112
+   },
+   {
+    "variable": "diferencial",
+    "descripcion": "Precio − IPC a cinco años (puntos)",
+    "importancia": 0.0153,
+    "desviacion": 0.0036
+   },
+   {
+    "variable": "log_precio",
+    "descripcion": "Nivel de precio (log €/m²)",
+    "importancia": 0.0145,
+    "desviacion": 0.0059
+   },
+   {
+    "variable": "esfuerzo_alquiler",
+    "descripcion": "Esfuerzo de alquiler (alquiler + gastos / renta)",
+    "importancia": 0.0134,
+    "desviacion": 0.0061
+   },
+   {
+    "variable": "esfuerzo",
+    "descripcion": "Esfuerzo actual (cuota / renta)",
+    "importancia": 0.0081,
+    "desviacion": 0.0021
+   },
+   {
+    "variable": "crec_precio_1a",
+    "descripcion": "Crecimiento del precio en un año (%)",
+    "importancia": 0.0015,
+    "desviacion": 0.0011
+   },
+   {
+    "variable": "tensionado_hoy",
+    "descripcion": "Tensionado hoy (0/1)",
+    "importancia": 0.0,
+    "desviacion": 0.0
+   },
+   {
+    "variable": "margen_esfuerzo",
+    "descripcion": "Distancia al umbral del 30 % (puntos)",
+    "importancia": 0.0,
+    "desviacion": 0.0
+   },
+   {
+    "variable": "var_diferencial_1a",
+    "descripcion": "Cambio del diferencial en un año (puntos)",
+    "importancia": -0.0066,
+    "desviacion": 0.0011
+   },
+   {
+    "variable": "tipo_interes",
+    "descripcion": "Tipo de interés hipotecario (%)",
+    "importancia": -0.0086,
+    "desviacion": 0.0055
    },
    {
     "variable": "var_compraventas_1a",
     "descripcion": "Crecimiento de las compraventas en un año (%)",
-    "importancia": -0.0038,
-    "desviacion": 0.0013
+    "importancia": -0.0126,
+    "desviacion": 0.0037
+   },
+   {
+    "variable": "var_esfuerzo_1a",
+    "descripcion": "Cambio del esfuerzo en un año (puntos)",
+    "importancia": -0.0138,
+    "desviacion": 0.0021
+   },
+   {
+    "variable": "crec_renta_1a",
+    "descripcion": "Crecimiento de la renta en un año (%)",
+    "importancia": -0.0179,
+    "desviacion": 0.0064
    }
   ],
   "coeficientes": [
    {
-    "variable": "tipo_interes",
-    "descripcion": "Tipo de interés hipotecario (%)",
-    "coeficiente": 1.8674
-   },
-   {
-    "variable": "log_precio",
-    "descripcion": "Nivel de precio (log €/m²)",
-    "coeficiente": 1.8017
-   },
-   {
     "variable": "diferencial",
     "descripcion": "Precio − IPC a cinco años (puntos)",
-    "coeficiente": 1.1325
+    "coeficiente": 1.5306
    },
    {
     "variable": "var_alquiler",
     "descripcion": "Crecimiento del alquiler en el año (%)",
-    "coeficiente": 1.0597
-   },
-   {
-    "variable": "var_tipo_1a",
-    "descripcion": "Cambio del tipo en un año (puntos)",
-    "coeficiente": -0.6131
-   },
-   {
-    "variable": "crec_precio_1a",
-    "descripcion": "Crecimiento del precio en un año (%)",
-    "coeficiente": 0.5726
-   },
-   {
-    "variable": "crec_renta_1a",
-    "descripcion": "Crecimiento de la renta en un año (%)",
-    "coeficiente": -0.5611
-   },
-   {
-    "variable": "tensionado_hoy",
-    "descripcion": "Tensionado hoy (0/1)",
-    "coeficiente": 0.5233
-   },
-   {
-    "variable": "compraventas_1000",
-    "descripcion": "Compraventas por 1.000 habitantes (último año)",
-    "coeficiente": 0.5119
-   },
-   {
-    "variable": "esfuerzo",
-    "descripcion": "Esfuerzo actual (cuota / renta)",
-    "coeficiente": -0.3158
-   },
-   {
-    "variable": "margen_esfuerzo",
-    "descripcion": "Distancia al umbral del 30 % (puntos)",
-    "coeficiente": -0.3158
-   },
-   {
-    "variable": "var_esfuerzo_1a",
-    "descripcion": "Cambio del esfuerzo en un año (puntos)",
-    "coeficiente": -0.3075
+    "coeficiente": 0.8966
    },
    {
     "variable": "var_compraventas_1a",
     "descripcion": "Crecimiento de las compraventas en un año (%)",
-    "coeficiente": 0.2405
+    "coeficiente": 0.8917
    },
    {
-    "variable": "var_diferencial_1a",
-    "descripcion": "Cambio del diferencial en un año (puntos)",
-    "coeficiente": 0.1033
+    "variable": "compraventas_1000",
+    "descripcion": "Compraventas por 1.000 habitantes (último año)",
+    "coeficiente": 0.8889
+   },
+   {
+    "variable": "diferencial_alquiler",
+    "descripcion": "Alquiler − IPC a cinco años (puntos)",
+    "coeficiente": 0.453
+   },
+   {
+    "variable": "tensionado_hoy",
+    "descripcion": "Tensionado hoy (0/1)",
+    "coeficiente": -0.335
+   },
+   {
+    "variable": "log_precio",
+    "descripcion": "Nivel de precio (log €/m²)",
+    "coeficiente": 0.3144
+   },
+   {
+    "variable": "var_esfuerzo_1a",
+    "descripcion": "Cambio del esfuerzo en un año (puntos)",
+    "coeficiente": -0.3118
    },
    {
     "variable": "esfuerzo_alquiler",
     "descripcion": "Esfuerzo de alquiler (alquiler + gastos / renta)",
-    "coeficiente": 0.0373
+    "coeficiente": 0.2493
+   },
+   {
+    "variable": "crec_precio_1a",
+    "descripcion": "Crecimiento del precio en un año (%)",
+    "coeficiente": 0.172
+   },
+   {
+    "variable": "margen_esfuerzo",
+    "descripcion": "Distancia al umbral del 30 % (puntos)",
+    "coeficiente": -0.1684
+   },
+   {
+    "variable": "esfuerzo",
+    "descripcion": "Esfuerzo actual (cuota / renta)",
+    "coeficiente": -0.1684
+   },
+   {
+    "variable": "var_diferencial_1a",
+    "descripcion": "Cambio del diferencial en un año (puntos)",
+    "coeficiente": 0.1259
+   },
+   {
+    "variable": "tipo_interes",
+    "descripcion": "Tipo de interés hipotecario (%)",
+    "coeficiente": 0.1162
+   },
+   {
+    "variable": "crec_renta_1a",
+    "descripcion": "Crecimiento de la renta en un año (%)",
+    "coeficiente": 0.1034
+   },
+   {
+    "variable": "var_tipo_1a",
+    "descripcion": "Cambio del tipo en un año (puntos)",
+    "coeficiente": -0.0598
    }
   ]
  },
  "municipios": {
-  "elegido": "Bosque aleatorio",
+  "elegido": "Regresión logística",
   "resumen": {
    "nivel": "cod_mun",
-   "umbral": 0.4,
+   "umbral": 0.05,
    "variables": [
     "esfuerzo",
     "margen_esfuerzo",
@@ -289,6 +301,7 @@
     "var_esfuerzo_1a",
     "diferencial",
     "var_diferencial_1a",
+    "diferencial_alquiler",
     "crec_precio_1a",
     "crec_renta_1a",
     "tipo_interes",
@@ -305,253 +318,264 @@
    "filas_prueba": 2251,
    "periodo_entrenamiento": "2015Q1 – 2020Q4",
    "periodo_prueba": "2021Q1 – 2022Q4",
-   "positivos_entrenamiento_pct": 54.1,
-   "positivos_prueba_pct": 64.1
+   "positivos_entrenamiento_pct": 74.4,
+   "positivos_prueba_pct": 79.2
   },
   "metricas": {
    "Referencia: clase mayoritaria": {
     "recall": 1.0,
-    "precision": 0.641,
-    "f1": 0.782,
-    "f2": 0.899,
+    "precision": 0.792,
+    "f1": 0.884,
+    "f2": 0.95,
     "exactitud_equilibrada": 0.5,
     "matriz": {
      "vn": 0,
-     "fp": 807,
+     "fp": 469,
      "fn": 0,
-     "vp": 1444
+     "vp": 1782
     }
    },
    "Referencia: persistencia": {
-    "recall": 0.904,
-    "precision": 0.789,
-    "f1": 0.843,
-    "f2": 0.878,
-    "exactitud_equilibrada": 0.736,
+    "recall": 0.969,
+    "precision": 0.845,
+    "f1": 0.903,
+    "f2": 0.941,
+    "exactitud_equilibrada": 0.647,
     "matriz": {
-     "vn": 459,
-     "fp": 348,
-     "fn": 139,
-     "vp": 1305
+     "vn": 152,
+     "fp": 317,
+     "fn": 55,
+     "vp": 1727
     },
-    "f2_validacion_temporal": 0.718
+    "f2_validacion_temporal": 0.848
    },
    "Regresión logística": {
-    "recall": 0.997,
-    "precision": 0.659,
-    "f1": 0.793,
-    "f2": 0.904,
-    "exactitud_equilibrada": 0.536,
+    "recall": 1.0,
+    "precision": 0.792,
+    "f1": 0.884,
+    "f2": 0.95,
+    "exactitud_equilibrada": 0.5,
     "matriz": {
-     "vn": 61,
-     "fp": 746,
-     "fn": 4,
-     "vp": 1440
+     "vn": 0,
+     "fp": 469,
+     "fn": 0,
+     "vp": 1782
     },
-    "roc_auc": 0.817,
-    "umbral": 0.2,
-    "f2_validacion_temporal": 0.933
+    "roc_auc": 0.718,
+    "umbral": 0.05,
+    "f2_validacion_temporal": 0.986
    },
    "Bosque aleatorio": {
-    "recall": 0.995,
-    "precision": 0.685,
-    "f1": 0.812,
-    "f2": 0.913,
-    "exactitud_equilibrada": 0.589,
+    "recall": 1.0,
+    "precision": 0.792,
+    "f1": 0.884,
+    "f2": 0.95,
+    "exactitud_equilibrada": 0.5,
     "matriz": {
-     "vn": 147,
-     "fp": 660,
-     "fn": 7,
-     "vp": 1437
+     "vn": 0,
+     "fp": 469,
+     "fn": 0,
+     "vp": 1782
     },
-    "roc_auc": 0.84,
-    "umbral": 0.4,
-    "f2_validacion_temporal": 0.933
+    "roc_auc": 0.794,
+    "umbral": 0.05,
+    "f2_validacion_temporal": 0.986
    },
    "Gradient boosting": {
     "recall": 1.0,
-    "precision": 0.647,
-    "f1": 0.786,
-    "f2": 0.902,
-    "exactitud_equilibrada": 0.512,
+    "precision": 0.792,
+    "f1": 0.884,
+    "f2": 0.95,
+    "exactitud_equilibrada": 0.5,
     "matriz": {
-     "vn": 19,
-     "fp": 788,
+     "vn": 0,
+     "fp": 469,
      "fn": 0,
-     "vp": 1444
+     "vp": 1782
     },
-    "roc_auc": 0.839,
-    "umbral": 0.1,
-    "f2_validacion_temporal": 0.931
+    "roc_auc": 0.813,
+    "umbral": 0.05,
+    "f2_validacion_temporal": 0.986
    }
   },
   "importancias": [
    {
-    "variable": "log_precio",
-    "descripcion": "Nivel de precio (log €/m²)",
-    "importancia": 0.0479,
-    "desviacion": 0.0057
-   },
-   {
     "variable": "diferencial",
     "descripcion": "Precio − IPC a cinco años (puntos)",
-    "importancia": 0.0344,
-    "desviacion": 0.0032
+    "importancia": 0.1294,
+    "desviacion": 0.0107
    },
    {
-    "variable": "tensionado_hoy",
-    "descripcion": "Tensionado hoy (0/1)",
-    "importancia": 0.0194,
-    "desviacion": 0.0033
+    "variable": "compraventas_1000",
+    "descripcion": "Compraventas por 1.000 habitantes (último año)",
+    "importancia": 0.014,
+    "desviacion": 0.0065
    },
    {
     "variable": "var_alquiler",
     "descripcion": "Crecimiento del alquiler en el año (%)",
-    "importancia": 0.0104,
-    "desviacion": 0.0021
+    "importancia": 0.0112,
+    "desviacion": 0.0038
+   },
+   {
+    "variable": "crec_precio_1a",
+    "descripcion": "Crecimiento del precio en un año (%)",
+    "importancia": 0.0055,
+    "desviacion": 0.0015
    },
    {
     "variable": "esfuerzo_alquiler",
     "descripcion": "Esfuerzo de alquiler (alquiler + gastos / renta)",
-    "importancia": 0.0063,
-    "desviacion": 0.0021
+    "importancia": 0.005,
+    "desviacion": 0.0009
    },
    {
-    "variable": "var_compraventas_1a",
-    "descripcion": "Crecimiento de las compraventas en un año (%)",
-    "importancia": 0.003,
-    "desviacion": 0.001
+    "variable": "tensionado_hoy",
+    "descripcion": "Tensionado hoy (0/1)",
+    "importancia": 0.0046,
+    "desviacion": 0.0003
    },
    {
-    "variable": "margen_esfuerzo",
-    "descripcion": "Distancia al umbral del 30 % (puntos)",
+    "variable": "crec_renta_1a",
+    "descripcion": "Crecimiento de la renta en un año (%)",
     "importancia": 0.0029,
-    "desviacion": 0.0022
+    "desviacion": 0.0023
+   },
+   {
+    "variable": "log_precio",
+    "descripcion": "Nivel de precio (log €/m²)",
+    "importancia": 0.0023,
+    "desviacion": 0.0005
    },
    {
     "variable": "esfuerzo",
     "descripcion": "Esfuerzo actual (cuota / renta)",
     "importancia": 0.0023,
-    "desviacion": 0.0019
+    "desviacion": 0.0005
    },
    {
-    "variable": "crec_renta_1a",
-    "descripcion": "Crecimiento de la renta en un año (%)",
-    "importancia": 0.0014,
-    "desviacion": 0.0004
-   },
-   {
-    "variable": "tipo_interes",
-    "descripcion": "Tipo de interés hipotecario (%)",
-    "importancia": 0.0012,
-    "desviacion": 0.0003
+    "variable": "margen_esfuerzo",
+    "descripcion": "Distancia al umbral del 30 % (puntos)",
+    "importancia": 0.0023,
+    "desviacion": 0.0005
    },
    {
     "variable": "var_esfuerzo_1a",
     "descripcion": "Cambio del esfuerzo en un año (puntos)",
-    "importancia": 0.0005,
-    "desviacion": 0.0006
-   },
-   {
-    "variable": "var_diferencial_1a",
-    "descripcion": "Cambio del diferencial en un año (puntos)",
-    "importancia": 0.0001,
-    "desviacion": 0.0004
+    "importancia": 0.0003,
+    "desviacion": 0.0001
    },
    {
     "variable": "var_tipo_1a",
     "descripcion": "Cambio del tipo en un año (puntos)",
-    "importancia": -0.0,
-    "desviacion": 0.0004
+    "importancia": 0.0003,
+    "desviacion": 0.0003
    },
    {
-    "variable": "crec_precio_1a",
-    "descripcion": "Crecimiento del precio en un año (%)",
-    "importancia": -0.0007,
-    "desviacion": 0.0008
+    "variable": "var_diferencial_1a",
+    "descripcion": "Cambio del diferencial en un año (puntos)",
+    "importancia": -0.0048,
+    "desviacion": 0.0007
    },
    {
-    "variable": "compraventas_1000",
-    "descripcion": "Compraventas por 1.000 habitantes (último año)",
-    "importancia": -0.0032,
-    "desviacion": 0.0019
+    "variable": "tipo_interes",
+    "descripcion": "Tipo de interés hipotecario (%)",
+    "importancia": -0.0056,
+    "desviacion": 0.0009
+   },
+   {
+    "variable": "diferencial_alquiler",
+    "descripcion": "Alquiler − IPC a cinco años (puntos)",
+    "importancia": -0.0105,
+    "desviacion": 0.0007
+   },
+   {
+    "variable": "var_compraventas_1a",
+    "descripcion": "Crecimiento de las compraventas en un año (%)",
+    "importancia": -0.0358,
+    "desviacion": 0.0093
    }
   ],
   "coeficientes": [
    {
     "variable": "diferencial",
     "descripcion": "Precio − IPC a cinco años (puntos)",
-    "coeficiente": 1.1704
-   },
-   {
-    "variable": "log_precio",
-    "descripcion": "Nivel de precio (log €/m²)",
-    "coeficiente": 0.9943
+    "coeficiente": 1.9492
    },
    {
     "variable": "var_alquiler",
     "descripcion": "Crecimiento del alquiler en el año (%)",
-    "coeficiente": 0.8937
-   },
-   {
-    "variable": "esfuerzo_alquiler",
-    "descripcion": "Esfuerzo de alquiler (alquiler + gastos / renta)",
-    "coeficiente": 0.5868
-   },
-   {
-    "variable": "tensionado_hoy",
-    "descripcion": "Tensionado hoy (0/1)",
-    "coeficiente": 0.4627
-   },
-   {
-    "variable": "crec_precio_1a",
-    "descripcion": "Crecimiento del precio en un año (%)",
-    "coeficiente": 0.4458
-   },
-   {
-    "variable": "compraventas_1000",
-    "descripcion": "Compraventas por 1.000 habitantes (último año)",
-    "coeficiente": 0.3908
+    "coeficiente": 1.1275
    },
    {
     "variable": "var_compraventas_1a",
     "descripcion": "Crecimiento de las compraventas en un año (%)",
-    "coeficiente": 0.2927
+    "coeficiente": 0.7577
    },
    {
-    "variable": "var_tipo_1a",
-    "descripcion": "Cambio del tipo en un año (puntos)",
-    "coeficiente": -0.2107
-   },
-   {
-    "variable": "var_esfuerzo_1a",
-    "descripcion": "Cambio del esfuerzo en un año (puntos)",
-    "coeficiente": -0.2014
-   },
-   {
-    "variable": "margen_esfuerzo",
-    "descripcion": "Distancia al umbral del 30 % (puntos)",
-    "coeficiente": -0.1806
-   },
-   {
-    "variable": "esfuerzo",
-    "descripcion": "Esfuerzo actual (cuota / renta)",
-    "coeficiente": -0.1806
-   },
-   {
-    "variable": "tipo_interes",
-    "descripcion": "Tipo de interés hipotecario (%)",
-    "coeficiente": 0.1004
+    "variable": "compraventas_1000",
+    "descripcion": "Compraventas por 1.000 habitantes (último año)",
+    "coeficiente": 0.6468
    },
    {
     "variable": "crec_renta_1a",
     "descripcion": "Crecimiento de la renta en un año (%)",
-    "coeficiente": -0.0747
+    "coeficiente": 0.4172
+   },
+   {
+    "variable": "tipo_interes",
+    "descripcion": "Tipo de interés hipotecario (%)",
+    "coeficiente": -0.3929
+   },
+   {
+    "variable": "crec_precio_1a",
+    "descripcion": "Crecimiento del precio en un año (%)",
+    "coeficiente": 0.3024
    },
    {
     "variable": "var_diferencial_1a",
     "descripcion": "Cambio del diferencial en un año (puntos)",
-    "coeficiente": -0.0421
+    "coeficiente": -0.2352
+   },
+   {
+    "variable": "diferencial_alquiler",
+    "descripcion": "Alquiler − IPC a cinco años (puntos)",
+    "coeficiente": -0.1674
+   },
+   {
+    "variable": "esfuerzo_alquiler",
+    "descripcion": "Esfuerzo de alquiler (alquiler + gastos / renta)",
+    "coeficiente": 0.1592
+   },
+   {
+    "variable": "tensionado_hoy",
+    "descripcion": "Tensionado hoy (0/1)",
+    "coeficiente": 0.1065
+   },
+   {
+    "variable": "esfuerzo",
+    "descripcion": "Esfuerzo actual (cuota / renta)",
+    "coeficiente": 0.0791
+   },
+   {
+    "variable": "margen_esfuerzo",
+    "descripcion": "Distancia al umbral del 30 % (puntos)",
+    "coeficiente": 0.0791
+   },
+   {
+    "variable": "log_precio",
+    "descripcion": "Nivel de precio (log €/m²)",
+    "coeficiente": 0.0597
+   },
+   {
+    "variable": "var_tipo_1a",
+    "descripcion": "Cambio del tipo en un año (puntos)",
+    "coeficiente": -0.0427
+   },
+   {
+    "variable": "var_esfuerzo_1a",
+    "descripcion": "Cambio del esfuerzo en un año (puntos)",
+    "coeficiente": -0.0241
    }
   ]
  }

@@ -73,6 +73,16 @@ def test_gastos_de_la_vivienda_se_suman_al_esfuerzo():
     assert con_gastos["esfuerzo"] == pytest.approx(sin_gastos["esfuerzo"] + 3_000 / 30_000)    # +10 puntos
 
 
+def test_criterio_de_precios_vale_con_compra_o_con_alquiler():
+    n = 21
+    panel = _panel(np.full(n, 1_000.0), np.linspace(100, 110, n))           # compra: −10 puntos
+    sube = criterios(panel.assign(alquiler_mes=np.linspace(500, 600, n)), "cod").iloc[-1]   # alquiler +20 %
+    baja = criterios(panel.assign(alquiler_mes=np.full(n, 500.0)), "cod").iloc[-1]
+    assert sube["diferencial"] == pytest.approx(-10)
+    assert sube["diferencial_alquiler"] == pytest.approx(10)
+    assert sube["criterio_precio"] and not baja["criterio_precio"]
+
+
 def test_criterio_de_esfuerzo_vale_con_hipoteca_o_con_alquiler():
     n = 21
     panel = _panel(np.full(n, 1_000.0), np.linspace(100, 110, n), renta=30_000).assign(gastos_vivienda=2_000.0)

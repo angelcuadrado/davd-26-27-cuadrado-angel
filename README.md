@@ -58,9 +58,13 @@ delante**. Eso es lo que hace esta aplicación.
   máximo es Málaga entre las provincias (28 %) y Fuengirola entre los municipios (29 %). Ojo: SERPAVI
   recoge los contratos en vigor declarados en el IRPF, muchos antiguos y más baratos que los anuncios de
   hoy, así que infravalora el esfuerzo de quien busca piso ahora.
-- La referencia de **persistencia** («dentro de dos años estará como hoy») es muy difícil de batir: el
-  modelo provincial elegido acierta algo más en sus avisos (precisión 67 % frente a 64 %) pero detecta
-  algo menos (recall 70 % frente a 75 %). Detalle y lectura en la pestaña *Predicción* de la app.
+- El **alquiler** también cuenta en el criterio de precios (la ley dice «compra o alquiler»): hoy lo
+  supera en 16 provincias, con Valencia (+17,7 puntos sobre el IPC) y Málaga (+12,4) a la cabeza. Entre
+  2019 y 2021, con el auge del alquiler y el IPC casi plano, más del 85 % de las provincias lo cumplían.
+- Para dentro de dos años (2028 T2) el modelo prevé 46 provincias tensionadas: entrarían 7 y saldrían 2.
+- La referencia de **persistencia** («dentro de dos años estará como hoy») es muy difícil de batir porque
+  el estado legal tiene mucha inercia: en la prueba acierta el 97 % de las tensiones con una precisión del
+  63 %, y ningún modelo la supera. Detalle y lectura en la pestaña *Predicción* de la app.
 
 ## Fuentes de datos
 
@@ -117,7 +121,8 @@ y se lee como las demás fuentes.
 **Clasificación binaria**: ¿cumplirá el territorio algún criterio dentro de ocho trimestres?
 
 - **Etiqueta**: el estado legal calculado hacia atrás con la misma regla; no es una definición propia.
-- **Variables** (15): esfuerzo de compra y su distancia al umbral, esfuerzo de alquiler, diferencial precio−IPC, sus cambios en un año,
+- **Variables** (16): esfuerzo de compra y su distancia al umbral, esfuerzo de alquiler, diferenciales precio−IPC
+  y alquiler−IPC, sus cambios en un año,
   crecimiento del precio y de la renta, tipo de interés y su cambio, nivel de precio, estado actual,
   compraventas por 1.000 habitantes y su variación, y variación del alquiler. Los municipios reciben las
   variables de mercado de su provincia.
@@ -132,14 +137,15 @@ y se lee como las demás fuentes.
 
 | Provincias, periodo de prueba | Recall | Precisión | AUC |
 | --- | --- | --- | --- |
-| Referencia: persistencia | 75 % | 64 % | — |
-| Regresión logística | 29 % | 94 % | 0,93 |
-| **Bosque aleatorio (elegido)** | 70 % | **67 %** | 0,94 |
-| Gradient boosting | 63 % | 58 % | 0,92 |
+| Referencia: persistencia | **97 %** | **63 %** | — |
+| Regresión logística | 92 % | 52 % | 0,73 |
+| Bosque aleatorio | 88 % | 51 % | 0,75 |
+| Gradient boosting (elegido) | 89 % | 49 % | 0,73 |
 
-El modelo se elige por F2 en la validación temporal, no en la prueba; en la prueba no supera el recall
-de la persistencia, y así se cuenta en la app. A nivel municipal el 64 % de los casos de prueba ya están
-tensionados, así que predecir siempre «tensión» acierta mucho; ahí la AUC (≈0,84) es la medida justa. El notebook
+El modelo se elige por F2 en la validación temporal, no en la prueba. En la prueba (2021–2022, con el 45 %
+de los casos tensionados a dos años) no supera a la persistencia, y así se cuenta en la app: con un
+criterio legal que mira cinco años atrás, «seguirá como hoy» es casi imbatible a dos años vista. A nivel
+municipal el 79 % de los casos de prueba ya están tensionados; ahí la AUC (≈0,81) es la medida justa. El notebook
 [`notebooks/exploracion_y_modelo.ipynb`](notebooks/exploracion_y_modelo.ipynb) recoge el análisis.
 
 ## El cuadro de mando
