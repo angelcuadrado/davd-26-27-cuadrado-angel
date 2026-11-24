@@ -520,7 +520,9 @@ def actualizar_mapa(indicador, posicion, provincia):
         tarjeta("Por precios (> IPC + 3)", str(int(actual["criterio_precio"].sum())), "criterio 2: compra o alquiler"),
         tarjeta("Esfuerzo mediano", pct(actual["esfuerzo"].median()), "de las 52 provincias"),
         tarjeta("Tensionadas en dos años", f"{int(pred['prediccion'].sum())} de {len(pred)}",
-                f"previsión para {etiqueta(ULTIMO + config.HORIZONTE_TRIMESTRES)}"),
+                f"{etiqueta(ULTIMO + config.HORIZONTE_TRIMESTRES)}: entrarían "
+                f"{int((pred['escenario'] == 'Entrará en tensión').sum())} y saldrían "
+                f"{int((pred['escenario'] == 'Saldrá de la tensión').sum())}"),
     ]
     texto_trimestre = ("Trimestre: el último disponible (la previsión se hace desde hoy)" if indicador == "probabilidad"
                        else f"Trimestre: {etiqueta(trimestre)}")
