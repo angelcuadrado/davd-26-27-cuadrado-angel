@@ -29,7 +29,11 @@ def layout():
                       html.P("Pulsa una provincia para ver su ficha. Canarias aparece desplazada para que el mapa "
                              "se lea mejor.", className="nota")],
                      className="columna-ancha tarjeta-grafico"),
-            html.Div([html.H3(id="titulo-ranking"), grafico("ranking")], className="columna-estrecha tarjeta-grafico"),
+            html.Div([html.H3(id="titulo-ranking"),
+                      html.Div([html.Span(className="muestra muestra-tension"), "Tensionado hoy",
+                                html.Span(className="muestra muestra-ok"), "Sin tensión"],
+                               className="leyenda", title="El color de cada barra es su situación legal hoy"),
+                      grafico("ranking")], className="columna-estrecha tarjeta-grafico"),
         ], className="fila-graficos"),
     ])
 
