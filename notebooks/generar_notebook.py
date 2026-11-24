@@ -44,7 +44,8 @@ celdas = [
        "de esfuerzo: los precios llevan cinco años creciendo bastante por encima del IPC, pero la cuota sobre la "
        "renta solo supera el 30 % en los mercados más caros."),
     md("## 3. Evolución: cuántas provincias cumplen cada criterio"),
-    code("evol = (prov[prov['trimestre'] >= '2015Q1'].groupby('trimestre')[['criterio_esfuerzo', 'criterio_precio', 'tensionado']]\n"
+    code("evol = (prov[prov['trimestre'] >= '2015Q1']\n"
+         "        .groupby('trimestre')[['criterio_esfuerzo', 'criterio_precio', 'tensionado']]\n"
          "        .sum().reset_index().melt('trimestre', var_name='criterio', value_name='provincias'))\n"
          "fig = px.line(evol, x='trimestre', y='provincias', color='criterio',\n"
          "              color_discrete_sequence=['#0072B2', '#E69F00', '#D55E00'])\n"

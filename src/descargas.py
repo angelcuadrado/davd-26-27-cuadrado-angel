@@ -8,7 +8,7 @@ import hashlib
 import json
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import urlencode
 
@@ -31,7 +31,7 @@ def _registrar(url: str, destino: Path) -> None:
     contenido = destino.read_bytes()
     manifiesto[destino.relative_to(RAW).as_posix()] = {
         "url": url,
-        "descargado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "descargado": datetime.now(UTC).isoformat(timespec="seconds"),
         "bytes": len(contenido),
         "sha256": hashlib.sha256(contenido).hexdigest(),
     }

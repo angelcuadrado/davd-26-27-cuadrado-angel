@@ -15,7 +15,7 @@ def test_filas_invalidas_se_apartan_con_su_motivo():
     validas, rechazadas, informe = validar({"precios_mun": precios})
 
     assert validas["precios_mun"]["cod_mun"].tolist() == ["1"]
-    motivos = dict(zip(rechazadas["cod_mun"], rechazadas["motivo"]))
+    motivos = dict(zip(rechazadas["cod_mun"], rechazadas["motivo"], strict=True))
     assert motivos["2"] == "precio €/m² informado"
     assert motivos["3"] == "precio entre 200 y 15.000 €/m²"
     assert "tasaciones" in rechazadas.loc[rechazadas["motivo"].str.contains("tasaciones"), "motivo"].iloc[0]

@@ -135,7 +135,7 @@ def codificar_municipios(fuente: pd.DataFrame, municipios: pd.DataFrame,
     provincia); 3) parecido ≥ 0,88 dentro de la provincia (erratas y tildes que faltan).
     """
     cod_provincia = codificar_provincias(fuente["provincia_fuente"], provincias)
-    cod_provincia = dict(zip(cod_provincia["nombre_fuente"], cod_provincia["cod_prov"]))
+    cod_provincia = dict(zip(cod_provincia["nombre_fuente"], cod_provincia["cod_prov"], strict=True))
 
     por_provincia, nacional = {}, {}
     for fila in municipios.itertuples():
@@ -168,6 +168,12 @@ def codificar_municipios(fuente: pd.DataFrame, municipios: pd.DataFrame,
                                             "cod_prov_fuente", "cod_mun", "metodo"])
 
 
+def _nivel(df: pd.DataFrame, nivel: str, columna: str) -> pd.DataFrame:
+    """Filas de un nivel territorial («provincia» o «municipio») con el código renombrado a cod_prov/cod_mun."""
+    clave = "cod_prov" if nivel == "provincia" else "cod_mun"
+    return df[df["nivel"] == nivel].rename(columns={"codigo": clave})[[clave, "anio", columna]]
+
+
 def normalizar(tablas: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.DataFrame], dict]:
     """Devuelve las tablas con códigos INE y un informe de los emparejamientos."""
     provincias, municipios = catalogo(tablas["renta"])
@@ -198,13 +204,13 @@ def normalizar(tablas: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.DataFrame]
         "municipios": municipios,
         "precios_prov": precios_prov,
         "precios_mun": precios_mun,
-        "renta_prov": renta[renta["nivel"] == "provincia"].rename(columns={"codigo": "cod_prov"})[["cod_prov", "anio", "renta_hogar"]],
-        "renta_mun": renta[renta["nivel"] == "municipio"].rename(columns={"codigo": "cod_mun"})[["cod_mun", "anio", "renta_hogar"]],
-        "poblacion_prov": poblacion[poblacion["nivel"] == "provincia"].rename(columns={"codigo": "cod_prov"})[["cod_prov", "anio", "poblacion"]],
-        "poblacion_mun": poblacion[poblacion["nivel"] == "municipio"].rename(columns={"codigo": "cod_mun"})[["cod_mun", "anio", "poblacion"]],
+        "renta_prov": _nivel(renta, "provincia", "renta_hogar"),
+        "renta_mun": _nivel(renta, "municipio", "renta_hogar"),
+        "poblacion_prov": _nivel(poblacion, "provincia", "poblacion"),
+        "poblacion_mun": _nivel(poblacion, "municipio", "poblacion"),
         "ipc": tablas["ipc"], "alquiler": tablas["alquiler"], "gastos_vivienda": tablas["gastos_vivienda"],
-        "alquiler_prov": serpavi[serpavi["nivel"] == "provincia"].rename(columns={"codigo": "cod_prov"})[["cod_prov", "anio", "alquiler_mes"]],
-        "alquiler_mun": serpavi[serpavi["nivel"] == "municipio"].rename(columns={"codigo": "cod_mun"})[["cod_mun", "anio", "alquiler_mes"]],
+        "alquiler_prov": _nivel(serpavi, "provincia", "alquiler_mes"),
+        "alquiler_mun": _nivel(serpavi, "municipio", "alquiler_mes"),
         "compraventas": tablas["compraventas"], "tipo_interes": tablas["tipo_interes"],
     }
 

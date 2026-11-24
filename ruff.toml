@@ -1,0 +1,11 @@
+# Estilo del código: ruff check src app tests notebooks (también en el CI)
+line-length = 130
+target-version = "py312"
+extend-exclude = ["*.ipynb"]
+
+[lint]
+# Errores, avisos, nombres sin usar, malas prácticas (bugbear), sintaxis moderna y orden de imports
+select = ["E", "W", "F", "B", "UP", "I"]
+
+[lint.isort]
+known-first-party = ["src", "app"]

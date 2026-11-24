@@ -50,8 +50,8 @@ def test_hueco_en_la_serie_no_se_confunde_con_cinco_anios():
     p = _panel(np.linspace(1_000, 1_500, 22), np.linspace(100, 110, 22)).drop(index=1)   # falta 2015 T2
     p = criterios(p, "cod").set_index("trimestre")
     # 2020 T1 se compara con 2015 T1 (existe); 2020 T2 necesitaría 2015 T2, que falta
-    assert p.loc[pd.Period("2020Q1", freq="Q"), "diferencial"] == pytest.approx(
-        100 * (p.loc[pd.Period("2020Q1", freq="Q"), "precio_m2"] / 1_000 - 1) - 100 * (p.loc[pd.Period("2020Q1", freq="Q"), "ipc"] / 100 - 1))
+    t1 = p.loc[pd.Period("2020Q1", freq="Q")]
+    assert t1["diferencial"] == pytest.approx(100 * (t1["precio_m2"] / 1_000 - 1) - 100 * (t1["ipc"] / 100 - 1))
     assert np.isnan(p.loc[pd.Period("2020Q2", freq="Q"), "diferencial"])
 
 

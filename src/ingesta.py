@@ -258,7 +258,8 @@ def alquiler_serpavi(refrescar: bool = False) -> pd.DataFrame:
     partes = []
     for hoja, nivel, columna_codigo in (("Provincias", "provincia", "CPRO"), ("Municipios", "municipio", "CUMUN")):
         ancho = pd.read_excel(fichero, sheet_name=hoja, dtype={columna_codigo: str},
-                              usecols=lambda c: c == columna_codigo or str(c).startswith(("ALQTBID12_M_", "BI_ALVHEPCO_")))
+                              usecols=lambda c, codigo=columna_codigo: c == codigo
+                              or str(c).startswith(("ALQTBID12_M_", "BI_ALVHEPCO_")))
         largo = ancho.melt(id_vars=columna_codigo, var_name="variable", value_name="valor")
         largo["anio"] = 2000 + largo["variable"].str[-2:].astype(int)
         largo["serie"] = largo["variable"].str[:-3]

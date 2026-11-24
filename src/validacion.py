@@ -3,8 +3,8 @@
 Cada regla dice qué filas son válidas. Las que no pasan se separan con su motivo (no se
 borran en silencio) y todo se resume en un informe de calidad en JSON que la app enseña.
 """
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 import pandas as pd
 

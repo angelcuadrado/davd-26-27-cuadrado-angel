@@ -11,7 +11,7 @@ import argparse
 import json
 import logging
 import warnings
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import joblib
 import pandas as pd
@@ -146,7 +146,7 @@ def ejecutar(refrescar: bool = False, con_modelo: bool = True) -> None:
 
     fuentes = json.loads(MANIFIESTO.read_text(encoding="utf-8")) if MANIFIESTO.exists() else {}
     calidad = {
-        "generado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "generado": datetime.now(UTC).isoformat(timespec="seconds"),
         "ultimo_trimestre_precios": str(provincias["trimestre"].max()),
         "ultimo_anio_renta": int(validas["renta_prov"]["anio"].max()),
         "supuestos": {

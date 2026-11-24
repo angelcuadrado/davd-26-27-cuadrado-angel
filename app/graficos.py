@@ -23,9 +23,11 @@ INDICADORES = {
                                          "la vivienda, entre la renta neta media del hogar."},
     "diferencial": {"titulo": "Precio − IPC a cinco años", "formato": "+.1f", "umbral": 3.0, "sufijo": " p.",
                     "explicacion": "Crecimiento acumulado del precio en cinco años menos el del IPC de la provincia, en puntos."},
-    "estado": {"titulo": "Situación legal hoy", "explicacion": "Tensionado si cumple al menos uno de los dos criterios del art. 18.3."},
+    "estado": {"titulo": "Situación legal hoy",
+               "explicacion": "Tensionado si cumple al menos uno de los dos criterios del art. 18.3."},
     "probabilidad": {"titulo": "Probabilidad de tensión en dos años", "formato": ".0%", "umbral": 0.5,
-                     "explicacion": "Probabilidad estimada por el modelo de que el territorio cumpla algún criterio dentro de ocho trimestres."},
+                     "explicacion": "Probabilidad estimada por el modelo de que el territorio cumpla algún criterio "
+                                    "dentro de ocho trimestres."},
 }
 
 
@@ -117,7 +119,8 @@ def ranking(datos: pd.DataFrame, indicador: str, nombre: str, n: int = 15) -> go
 def serie_esfuerzo(series: dict[str, pd.DataFrame]) -> go.Figure:
     """Esfuerzo a lo largo del tiempo para uno o varios territorios, con el umbral del 30 %."""
     fig = go.Figure()
-    for (nombre, df), color in zip(series.items(), [AZUL, NARANJA, VERDE, BERMELLON]):
+    colores = [AZUL, NARANJA, VERDE, BERMELLON]                  # orden fijo; como mucho cuatro series
+    for (nombre, df), color in zip(series.items(), colores[:len(series)], strict=True):
         df = df.dropna(subset=["esfuerzo"])
         real = df[~df["renta_estimada"].astype(bool)]
         estimado = df[df["renta_estimada"].astype(bool)]

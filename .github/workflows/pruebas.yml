@@ -15,7 +15,9 @@ jobs:
           python-version: "3.12"
           cache: pip
       - name: Instalar dependencias
-        run: pip install -r requirements.txt pytest
+        run: pip install -r requirements.txt pytest ruff==0.17.6
+      - name: Estilo (ruff)
+        run: ruff check src app tests notebooks
       - name: Pruebas
         run: python -m pytest
       - name: La app arranca con los artefactos publicados
