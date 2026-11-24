@@ -204,8 +204,14 @@ La app funciona sin ejecutar el pipeline, porque `data/publicado/` ya viene en e
 
 ## Despliegue
 
-Render, plan gratuito, con el `render.yaml` del repositorio: *New → Blueprint* y elegir este repositorio.
-La app arranca con `gunicorn app.app:server --workers 1 --threads 4` y lee `data/publicado/`, así que
+Servicio web de Render (plan gratuito) creado desde la URL pública del repositorio, con:
+
+- *Build command*: `pip install -r requirements.txt` (Python 3.12, fijado en `.python-version`)
+- *Start command*: `gunicorn app.app:server --workers 1 --threads 4 --timeout 120`
+
+Al crearlo desde una URL pública, Render no se entera de los push: cada versión nueva se despliega con
+*Manual Deploy → Deploy latest commit*. `render.yaml` recoge la misma configuración por si se prefiere
+crear el servicio como *Blueprint* conectando la cuenta de GitHub. La app lee `data/publicado/`, así que
 no necesita red ni reentrenar. Con los 0,1 CPU del plan gratuito, cada pestaña se calcula solo cuando
 está a la vista, los resultados se guardan en memoria y las respuestas van comprimidas.
 
